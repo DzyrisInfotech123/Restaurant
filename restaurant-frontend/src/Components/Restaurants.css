@@ -1,0 +1,124 @@
+/* Section Styles */
+.restaurants {
+    padding: 2rem;
+    background-color: #f9fafb;
+  }
+  
+  .Reshead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    margin-top: -1.5rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color:#ff1547;
+  }
+  
+  .see-all {
+    font-size: 1rem;
+    font-weight: bolder;
+    color: #ff1547;
+    text-decoration: none;
+  }
+  
+  .see-all:hover {
+    text-decoration: underline;
+  }
+  
+  /* Grid Styles */
+  .restaurants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+    gap: 1.5rem;
+  }
+  
+  /* Card Styles */
+  .restaurant-card {
+    display: flex;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+  }
+  
+  .restaurant-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Image Styling */
+  .restaurant-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 12px 0 0 12px;
+  }
+  
+  /* Information Styling */
+  .restaurant-info {
+    padding: 1rem;
+    flex: 1;
+  }
+  
+  .restaurant-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .details {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+  
+  .details span {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Tags */
+  .tags {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .status-tag {
+    font-size: 0.875rem;
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    color: #ffffff;
+  }
+  
+  .status-tag.open {
+    background-color: #22c55e;
+  }
+  
+  .status-tag.closed {
+    background-color: #ef4444;
+  }
+
+  .restaurant-card.closed {
+    opacity: 0.5; /* Dim the card */
+    pointer-events: none; /* Disable interactions with closed restaurants */
+  }
+  
+  .closed-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #ff0000;
+  }
+  
+  

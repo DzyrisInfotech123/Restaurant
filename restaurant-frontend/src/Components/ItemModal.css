@@ -1,0 +1,155 @@
+/* Modal Overlay */
+@import url('https://fonts.googleapis.com/css2?family=Chewy&display=swap');
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 450px;
+    max-width: 100%;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  
+  /* Modal Header (Item Title) */
+  .modal-content h2 {
+    margin: 0 0 15px;
+    font-size: 1.3rem;
+    color: #333;
+  }
+  
+  /* Modal Item Description */
+  .modal-content p {
+    margin: 3px 0 0px;
+    color: #222222;
+    font-size: 1.0rem;
+  }
+  
+  /* Price Display */
+  .modal-content span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 0px;
+    display: block;
+  }
+  
+  /* Extras Section */
+  .extras {
+    margin-top: 15px;
+    text-align: left;
+    font-family: 'Chewy', cursive; /* Compact and foodie font */
+  }
+  
+  .extras h4 {
+    font-size: 1.3rem;
+    font-weight: normal; 
+    font-weight: bold;
+    color: #f44d5c; /* Vibrant red */
+    margin-bottom: 12px;
+  }
+  
+  .add-ons-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .add-ons-left,
+  .add-ons-right {
+    width: 60%; /* Each column takes up 48% of the available space */
+  }
+  
+  .add-ons-left div,
+  .add-ons-right div {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: #292929;
+  }
+  
+  .add-ons-left input[type="checkbox"],
+  .add-ons-right input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2); /* Make checkboxes bigger */
+  }
+  
+  
+  /* Quantity Section */
+  .quantity {
+    margin-top: 15px;
+    text-align: left;
+  }
+  
+  .quantity h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .quantity input {
+    width: 60px;
+    padding: 5px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  /* Modal Buttons */
+  .modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .modal-buttons button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .modal-buttons button:hover {
+    background-color: #218838;
+  }
+  
+  .modal-buttons button:last-child {
+    background-color: #dc3545;
+  }
+  
+  .modal-buttons button:last-child:hover {
+    background-color: #c82333;
+  }
+  /* Item Image */
+.item-img-container {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .item-img {
+    max-width: 30%;
+    height: 10%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  

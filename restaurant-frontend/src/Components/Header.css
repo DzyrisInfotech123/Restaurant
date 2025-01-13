@@ -1,0 +1,92 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: linear-gradient(to right, #ff3668, #ffffff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header .text-gray-600 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem; /* Adjust size as needed */
+  font-weight: bold; /* Bold font */
+  font-family: 'Poppins', sans-serif; /* Stylish font */
+  color: #ffffff; /* Red color */
+  letter-spacing: 0.5px; /* Slight letter spacing for a stylish effect */
+  text-transform: uppercase; /* Makes the text uppercase for a bold look */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow for depth */
+  padding: 5px 10px; /* Adds padding for a more defined look */
+}
+
+.header .text-gray-600 i {
+  font-size: 1.4rem; /* Adjust icon size */
+  color: #ffffff; /* Ensure the icon is also red */
+}
+
+
+.header input[type="text"] {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.header .btn {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+  color: #ff0040;
+  cursor: pointer;
+}
+
+.header .btn i {
+  font-size: 1.2rem;
+}
+
+.header .btn:hover {
+  background-color: #f3f4f6;
+}
+
+/* Dropdown Menu Styling */
+/* Dropdown Menu Styling */
+.dropdown-menu {
+  position: absolute;
+  top: 40px;  /* Adjust as needed */
+  right: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 150px;
+  z-index: 1000;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-menu li i {
+  margin-right: 8px;  /* Space between icon and text */
+}
+
+.dropdown-menu li:first-child {
+  border-top: none;
+}
