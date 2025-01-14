@@ -8,7 +8,8 @@ const authRoutes = require('./auth');
 const restaurantRoutes = require('./RestaurantRoutes');
 const menuRoutes = require('./menuRoutes');
 const vendorRoutes = require('./VendorRoutes');
-const productPricing = require('./ProductPricingRoutes')
+const productPricing = require('./ProductPricingRoutes');
+const orderRoutes = require('./orderRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -34,6 +35,7 @@ app.use('/api', restaurantRoutes);
 app.use('/api', menuRoutes);
 app.use('/api', vendorRoutes);
 app.use('/api', productPricing);
+app.use('/api', orderRoutes)
 
 // Start server
 app.listen(PORT, () => {
