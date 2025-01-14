@@ -1,0 +1,101 @@
+.menu {
+    padding: 2rem;
+  }
+
+  .Restitle{
+    margin-top: 0%;
+    color:#ff1547;
+  }
+  
+  .menu-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .menu-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .menu-img {
+    width: 205px; /* Set a uniform width */
+    height: 180px; /* Set a uniform height */
+    object-fit: cover; /* Ensure the image fits within the dimensions without distortion */
+    border-radius: 8px; /* Optional: Add rounded corners for aesthetics */
+    display: block; /* Ensures proper alignment */
+    margin: 0 auto; /* Centers the image horizontally */
+  }
+  
+  
+  .menu-info {
+    font-size: 0.9rem;
+  }
+  
+  .menu-name {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .menu-desc {
+    color: #555;
+    margin-bottom: 0.5rem;
+  }
+  
+  .menu-price {
+    color: #e91e63;
+    font-weight: bold;
+  }
+
+  .filter-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .filter-btn {
+    padding: 0.3rem 0.6rem;
+    background-color: #ff3a5b;
+    border: 1px solid #e6e6e6;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'Lobster', cursive; /* Apply foodie font */
+    font-size: 0.8rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .filter-btn.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .filter-btn:hover {
+    background-color: #ff6a90;
+  }
+
+  .back {
+    background-color: #ff1952;
+    color: white;
+    border: none;
+    padding: 7px 11px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .back:hover {
+    background-color: #0061c9;
+  }
+  
