@@ -68,7 +68,7 @@ const RestaurantTable = () => {
       dataIndex: 'imgPath',
       key: 'imgPath',
       render: (text, record) => {
-        const imageUrl = `http://localhost:4001${record.imgPath}`; // Avoid double slash issue
+        const imageUrl = `https://dev.digitalexamregistration.com${record.imgPath}`; // Avoid double slash issue
         return (
           <img
             src={imageUrl}

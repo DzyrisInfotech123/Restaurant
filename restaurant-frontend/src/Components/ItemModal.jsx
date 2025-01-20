@@ -94,7 +94,7 @@ const ItemModal = ({ item, closeModal }) => {
         {/* Item Image */}
         <div className="item-img-container">
         <img
-                src={`http://localhost:4001${item.imgPath}`} // Use the correct path from backend
+                src={`https://dev.digitalexamregistration.com${item.imgPath}`} // Use the correct path from backend
                 alt={item.name}
                 className="menu-img"
                 onError={(e) => {

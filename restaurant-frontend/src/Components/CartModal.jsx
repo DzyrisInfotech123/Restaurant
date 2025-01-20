@@ -78,7 +78,7 @@ const CartModal = ({ closeModal }) => {
     };
   
     try {
-      const response = await fetch("http://localhost:4001/api/placeOrder", {
+      const response = await fetch("https://dev.digitalexamregistration.com/api/placeOrder", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +129,7 @@ const CartModal = ({ closeModal }) => {
               {cart.map((item, index) => (
                 <div className="cart-item" key={index}>
                   <img
-                    src={`http://localhost:4001${item.imgPath}`}
+                    src={`https://dev.digitalexamregistration.com${item.imgPath}`}
                     alt={item.name}
                     className="item-image"
                     onError={(e) => {

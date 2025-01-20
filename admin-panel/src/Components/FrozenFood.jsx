@@ -16,8 +16,8 @@ const FrozenFood = ({ frozenFoodData, onSubmit }) => {
     try {
       let response;
       const endpoint = isEditing
-        ? `http://localhost:4001/api/editFrozenFood/${frozenFoodData._id}` // Ensure it's _id here
-        : "http://localhost:4001/api/addFrozenFood"; // For adding new frozen food item
+        ? `https://dev.digitalexamregistration.com/api/editFrozenFood/${frozenFoodData._id}` // Ensure it's _id here
+        : "https://dev.digitalexamregistration.com/api/addFrozenFood"; // For adding new frozen food item
 
       // Make POST or PUT request based on editing or adding
       if (isEditing) {

@@ -32,7 +32,7 @@ const OrderConfirmation = () => {
 
   // Fetch orders
   useEffect(() => {
-    const vendorId = localStorage.getItem("vendorId"); // Assuming vendorId is stored in localStorage
+    const vendorId = localStorage.getItem("vendorId");
 
     const fetchOrders = async () => {
       if (!vendorId) {
@@ -43,7 +43,7 @@ const OrderConfirmation = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:4001/api/getOrders?vendorId=${vendorId}`
+          `https://dev.digitalexamregistration.com/api/getOrders?vendorId=${vendorId}`
         );
         if (response.data && response.data.length === 0) {
           // No orders found
@@ -72,12 +72,13 @@ const OrderConfirmation = () => {
   }, []);
 
   const formatDate = (date) => {
-    const parsedDate = moment(date);
+    const parsedDate = moment(date); // Parsing ISO string
     if (!parsedDate.isValid()) {
       return "Invalid Date";
     }
     return parsedDate.format('MMMM DD, YYYY'); // Format like "January 18, 2025"
   };
+  
 
   if (loading) return <div>Loading...</div>;
 
@@ -89,7 +90,6 @@ const OrderConfirmation = () => {
         Back to Restaurants
       </button>
 
-      {/* Always show the header */}
       {error || orders.length === 0 ? (
         <div className="no-orders">
           <h3>You have no orders</h3>
@@ -99,13 +99,15 @@ const OrderConfirmation = () => {
         orders.map((order) => {
           const { cart = [], subtotal = 0, total = 0, orderNumber, orderDate, taxes = 0 } = order;
 
-          // Use the formatDate function to ensure the date is formatted correctly
-          const formattedOrderDate = formatDate(orderDate);
+          // Log the order date to check what's being passed
+          console.log("Order Date:", orderDate);
+
+          const formattedOrderDate = formatDate(orderDate); // Format the order date
 
           return (
             <div key={orderNumber} className="order-summary">
-              <h3>Order Number: {orderNumber}</h3> {/* Display Order Number */}
-              <p>Order Date: {formattedOrderDate}</p> {/* Display Order Date */}
+              <h3>Order Number: {orderNumber}</h3>
+              <p>Order Date: {formattedOrderDate}</p>
 
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -130,7 +132,7 @@ const OrderConfirmation = () => {
                             <div className="order-item" key={index}>
                               <div className="order-item-info">
                                 <img
-                                  src={item.imgPath ? `http://localhost:4001${item.imgPath}` : "/path/to/default-image.jpg"}
+                                  src={item.imgPath ? `https://dev.digitalexamregistration.com${item.imgPath}` : "/path/to/default-image.jpg"}
                                   alt={item.name}
                                   className="item-image"
                                   onError={(e) => {
@@ -164,7 +166,6 @@ const OrderConfirmation = () => {
                   </div>
                 </AccordionDetails>
 
-                {/* Add the tracking steps inside the Accordion */}
                 <AccordionDetails>
                   <div className="order-tracking">
                     <h3 className="trackhead">Track Your Order</h3>

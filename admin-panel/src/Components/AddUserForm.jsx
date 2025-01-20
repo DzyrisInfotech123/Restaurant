@@ -11,7 +11,7 @@ const AddUserForm = ({ loggedInUser }) => {
     // Fetch vendors list (you might already have this list from your backend API)
     const fetchVendors = async () => {
       try {
-        const response = await axios.get('http://localhost:4001/api/getVendor');
+        const response = await axios.get('https://dev.digitalexamregistration.com/api/getVendor');
         setVendors(response.data);  // Assuming the response contains a list of vendors
       } catch (error) {
         console.error('Error fetching vendors:', error);
@@ -24,7 +24,7 @@ const AddUserForm = ({ loggedInUser }) => {
   const onFinish = async (values) => {
     try {
       const { username, password, role, vendorId } = values; // Include vendorId
-      const response = await axios.post('http://localhost:4001/api/addUser', { username, password, role, vendorId });
+      const response = await axios.post('https://dev.digitalexamregistration.com/api/addUser', { username, password, role, vendorId });
       message.success('User added successfully!');
       form.resetFields(); // Reset the form after successful submission
     } catch (error) {

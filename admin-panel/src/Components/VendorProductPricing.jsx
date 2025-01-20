@@ -16,7 +16,7 @@ const VendorProductPricing = () => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await axios.get("http://localhost:4001/api/getVendor");
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getVendor");
         setVendors(response.data);
       } catch (error) {
         message.error("Error fetching vendors.");
@@ -33,7 +33,7 @@ const VendorProductPricing = () => {
       if (!selectedVendor) return;
 
       try {
-        const response = await axios.get("http://localhost:4001/api/getRestaurant", {
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getRestaurant", {
           params: { vendorId: selectedVendor },
         });
         setRestaurants(response.data);
@@ -52,13 +52,13 @@ const VendorProductPricing = () => {
       if (!selectedRestaurant || !selectedVendor) return;
   
       try {
-        const response = await axios.get("http://localhost:4001/api/getMenuItems", {
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getMenuItems", {
           params: { restaurantId: selectedRestaurant, vendorId: selectedVendor },
         });
         setMenuItems(response.data);
   
         // Fetch the existing pricing for the selected vendor and restaurant
-        const pricingResponse = await axios.get("http://localhost:4001/api/getProductPricing", {
+        const pricingResponse = await axios.get("https://dev.digitalexamregistration.com/api/getProductPricing", {
           params: { vendorId: selectedVendor, restaurantId: selectedRestaurant },
         });
   
@@ -122,7 +122,7 @@ const VendorProductPricing = () => {
     try {
       // Send the pricing data to the backend
       const response = await axios.post(
-        "http://localhost:4001/api/addProductPricing",
+        "https://dev.digitalexamregistration.com/api/addProductPricing",
         {
           vendorId: selectedVendor,
           restaurantId: selectedRestaurant,

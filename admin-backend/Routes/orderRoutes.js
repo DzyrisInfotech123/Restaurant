@@ -58,12 +58,23 @@ router.get("/getOrders", async (req, res) => {
       return res.status(404).json({ error: "No orders found for this vendor." });
     }
 
-    res.status(200).json(orders);
+    // Add the formatted orderDate without changing the existing structure
+    const enrichedOrders = orders.map(order => {
+      const formattedOrderDate = order.date ? order.date.toISOString() : null;
+
+      return {
+        ...order.toObject(),  // Convert mongoose document to plain object
+        orderDate: formattedOrderDate  // Add formatted orderDate
+      };
+    });
+
+    res.status(200).json(enrichedOrders);
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.status(500).json({ error: "Failed to fetch orders", details: error.message });
   }
 });
+
 
 // Fetch all orders with vendor names
 router.get("/getOrder", async (req, res) => {
@@ -74,34 +85,34 @@ router.get("/getOrder", async (req, res) => {
       return res.status(404).json({ error: "No orders found." });
     }
 
-    // Extract unique vendorIds from the cart items
-    const vendorIds = [...new Set(orders.flatMap(order => order.cart.map(item => item.vendorId)))] ;
+    const vendorIds = [...new Set(orders.flatMap(order => order.cart.map(item => item.vendorId)))];
 
-    // Fetch vendor details using `_id`
     const vendors = await Vendor.find({ _id: { $in: vendorIds } });
-
-    // Create a mapping of `_id` to vendorName
     const vendorMap = vendors.reduce((acc, vendor) => {
       acc[vendor._id.toString()] = vendor.vendorName;
       return acc;
     }, {});
 
-    // Log unmatched vendors for debugging
     const unmatchedVendors = vendorIds.filter(id => !vendorMap[id]);
     if (unmatchedVendors.length) {
       console.warn("Unmatched vendor IDs:", unmatchedVendors);
     }
 
-    // Attach vendor names and ensure that order date is in UTC string format
-    const enrichedOrders = orders.map(order => ({
-      ...order,
-      cart: order.cart.map(item => ({
-        ...item,
-        vendorName: vendorMap[item.vendorId] || `Unknown Vendor (${item.vendorId})`,
-      })),
-      // Ensure the order date is in UTC format
-      orderDate: order.orderDate.toISOString(), // Convert date to ISO string in UTC
-    }));
+    const enrichedOrders = orders.map(order => {
+      console.log("Raw date:", order.date);  // Log the raw date
+
+      // Ensure the date is in UTC ISO format
+      const formattedDate = order.date ? order.date.toISOString() : null;
+
+      return {
+        ...order,
+        cart: order.cart.map(item => ({
+          ...item,
+          vendorName: vendorMap[item.vendorId] || `Unknown Vendor (${item.vendorId})`,
+        })),
+        orderDate: formattedDate,
+      };
+    });
 
     res.status(200).json(enrichedOrders);
   } catch (error) {
@@ -109,6 +120,8 @@ router.get("/getOrder", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders", details: error.message });
   }
 });
+
+
 
 
 // Search orders by order number

@@ -12,7 +12,7 @@ const FrozenFoodTable = () => {
   useEffect(() => {
     const fetchFrozenFoods = async () => {
       try {
-        const response = await axios.get("http://localhost:4001/api/getFrozenFood");
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getFrozenFood");
         setFrozenFoods(response.data);
       } catch (error) {
         message.error("Error fetching frozen food items.");
@@ -26,7 +26,7 @@ const FrozenFoodTable = () => {
   // Handle the delete action
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:4001/api/deleteFrozenFood/${id}`);
+      const response = await axios.delete(`https://dev.digitalexamregistration.com/api/deleteFrozenFood/${id}`);
       if (response.status === 200) {
         message.success("Frozen food item deleted successfully");
         // Refresh the list after deletion

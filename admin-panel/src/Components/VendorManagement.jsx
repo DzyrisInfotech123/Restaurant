@@ -86,7 +86,7 @@ const VendorManagement = ({ vendorData, onSubmit }) => {
 
     try {
       let response;
-      const endpoint = `http://localhost:4001/api/editVendor/${values.vendorId}`; // Use vendorId in the URL
+      const endpoint = `https://dev.digitalexamregistration.com/api/editVendor/${values.vendorId}`; // Use vendorId in the URL
 
       // Check if it's editing mode and make PUT request
       if (isEditing && values.vendorId) {
@@ -94,7 +94,7 @@ const VendorManagement = ({ vendorData, onSubmit }) => {
         message.success("Vendor details updated successfully!");
       } else {
         // If adding new vendor, make POST request
-        response = await axios.post("http://localhost:4001/api/addVendor", requestData);
+        response = await axios.post("https://dev.digitalexamregistration.com/api/addVendor", requestData);
         message.success("Vendor details added successfully!");
       }
 

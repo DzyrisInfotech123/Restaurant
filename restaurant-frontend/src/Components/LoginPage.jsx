@@ -18,7 +18,7 @@ function LoginPage() {
     setError(null); // Reset error message if any
 
     try {
-      const response = await axios.post("http://localhost:4001/api/login", {
+      const response = await axios.post("https://dev.digitalexamregistration.com/api/login", {
         username,
         password,
       });

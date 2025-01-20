@@ -22,7 +22,7 @@ const ViewVendorPricing = () => {
     const fetchVendors = async () => {
       setLoadingVendors(true);
       try {
-        const response = await axios.get("http://localhost:4001/api/getVendor");
+        const response = await axios.get("https://dev.digitalexamregistration.com/getVendor");
         setVendors(response.data);
       } catch (error) {
         message.error("Error fetching vendors.");
@@ -41,7 +41,7 @@ const ViewVendorPricing = () => {
 
       setLoadingRestaurants(true);
       try {
-        const response = await axios.get("http://localhost:4001/api/getRestaurant", {
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getRestaurant", {
           params: { vendorId: selectedVendor },
         });
         setRestaurants(response.data);
@@ -62,7 +62,7 @@ const ViewVendorPricing = () => {
 
       setLoadingMenuItems(true);
       try {
-        const response = await axios.get("http://localhost:4001/api/getProductPricing", {
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getProductPricing", {
           params: { restaurantId: selectedRestaurant, vendorId: selectedVendor },
         });
 

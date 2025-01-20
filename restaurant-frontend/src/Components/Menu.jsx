@@ -23,7 +23,7 @@ const Menu = ({ restaurant, addToCart }) => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await fetch("http://localhost:4001/api/getVendor");
+        const response = await fetch("https://dev.digitalexamregistration.com/api/getVendor");
         if (!response.ok) throw new Error("Failed to fetch vendors");
         const data = await response.json();
         setVendors(data);
@@ -38,7 +38,7 @@ const Menu = ({ restaurant, addToCart }) => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await fetch(`http://localhost:4001/api/getMenuItems?restaurantId=${restaurant._id}`);
+        const response = await fetch(`https://dev.digitalexamregistration.com/api/getMenuItems?restaurantId=${restaurant._id}`);
         if (!response.ok) throw new Error("Failed to fetch menu items");
         const data = await response.json();
         setMenuItems(data);
@@ -61,7 +61,7 @@ const Menu = ({ restaurant, addToCart }) => {
 
       try {
         const response = await fetch(
-          `http://localhost:4001/api/getProductPricing?vendorId=${selectedVendor._id}&restaurantId=${restaurant._id}`
+          `https://dev.digitalexamregistration.com/api/getProductPricing?vendorId=${selectedVendor._id}&restaurantId=${restaurant._id}`
         );
         if (!response.ok) throw new Error("Failed to fetch product pricing");
         const data = await response.json();
@@ -150,7 +150,7 @@ const Menu = ({ restaurant, addToCart }) => {
               onClick={() => handleItemClick(item)}
             >
               <img
-                src={`http://localhost:4001${item.imgPath}`}
+                src={`https://dev.digitalexamregistration.com${item.imgPath}`}
                 alt={item.name}
                 className="menu-img"
                 onError={(e) => e.target.src = '/admin-backend/Routes/menuitems'}

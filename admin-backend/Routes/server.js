@@ -12,7 +12,7 @@ const productPricing = require('./ProductPricingRoutes');
 const orderRoutes = require('./orderRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT || 4100;
 
 app.use(cors());
 app.use(bodyParser.json());

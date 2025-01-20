@@ -12,7 +12,7 @@ const Restaurants = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await axios.get("http://localhost:4001/api/getRestaurant"); // Update with your backend URL
+        const response = await axios.get("https://dev.digitalexamregistration.com/api/getRestaurant"); // Update with your backend URL
         setRestaurants(response.data); // Store fetched data
       } catch (error) {
         console.error("Error fetching restaurant data:", error);
@@ -48,7 +48,7 @@ const Restaurants = () => {
 
     // Optionally, persist status change to backend
     try {
-      await axios.put(`http://localhost:4001/api/updateRestaurant/${restaurant._id}`, {
+      await axios.put(`https://dev.digitalexamregistration.com/api/updateRestaurant/${restaurant._id}`, {
         status: updatedRestaurant.status,
       });
     } catch (error) {
@@ -91,7 +91,7 @@ const Restaurants = () => {
           >
             {/* Update the image src to include the correct path */}
             <img
-              src={`http://localhost:4001${restaurant.imgPath}`}
+              src={`https://dev.digitalexamregistration.com/api/${restaurant.imgPath}`}
               alt={`${restaurant.name} logo`}
               className="restaurant-img"
               style={{ width: '100px', height: '100px', objectFit: 'cover' }} // Set size and object fit
