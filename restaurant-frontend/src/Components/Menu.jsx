@@ -150,10 +150,9 @@ const Menu = ({ restaurant, addToCart }) => {
               onClick={() => handleItemClick(item)}
             >
               <img
-                src={`https://dev.digitalexamregistration.com${item.imgPath}`}
+                src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
                 alt={item.name}
                 className="menu-img"
-                onError={(e) => e.target.src = '/admin-backend/Routes/menuitems'}
               />
               <div className="menu-info">
                 <h3 className="menu-name">{item.name}</h3>

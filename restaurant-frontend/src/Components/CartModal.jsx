@@ -129,7 +129,7 @@ const CartModal = ({ closeModal }) => {
               {cart.map((item, index) => (
                 <div className="cart-item" key={index}>
                   <img
-                    src={`https://dev.digitalexamregistration.com${item.imgPath}`}
+                    src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
                     alt={item.name}
                     className="item-image"
                     onError={(e) => {

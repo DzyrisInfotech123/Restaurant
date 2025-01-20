@@ -132,7 +132,7 @@ const OrderConfirmation = () => {
                             <div className="order-item" key={index}>
                               <div className="order-item-info">
                                 <img
-                                  src={item.imgPath ? `https://dev.digitalexamregistration.com${item.imgPath}` : "/path/to/default-image.jpg"}
+                                  src={item.imgPath ? `https://dev.digitalexamregistration.com/api/${item.imgPath}` : "/path/to/default-image.jpg"}
                                   alt={item.name}
                                   className="item-image"
                                   onError={(e) => {

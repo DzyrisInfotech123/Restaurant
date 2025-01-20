@@ -126,10 +126,22 @@ const OrderManagement = () => {
             title: "Vendor Name",
             key: "vendorName",
             render: (_, record) => {
-              // Get unique vendor names from the cart items
               const uniqueVendorNames = [...new Set(record.cart.map(item => item.vendorName))];
               return uniqueVendorNames.join(", ");
             },
+          },
+          {
+            title: "Cart Details",
+            key: "cartDetails",
+            render: (_, record) => (
+              <div>
+                {record.cart.map((item, index) => (
+                  <div key={index}>
+                    <strong>{item.name}</strong> - Qty: {item.quantity}, Price: ₹{item.price}, Total: ₹{item.totalPrice}
+                  </div>
+                ))}
+              </div>
+            ),
           },
           { title: "Status", dataIndex: "status", key: "status" },
           {
@@ -137,10 +149,9 @@ const OrderManagement = () => {
             dataIndex: "orderDate",
             key: "orderDate",
             render: (text) => {
-              const parsedDate = moment.utc(text).utcOffset(0); // Make sure it's treated as UTC without local timezone adjustment
-              console.log("Parsed Date:", parsedDate.format("YYYY-MM-DD")); // Debugging log
-              return parsedDate.format("YYYY-MM-DD"); // Format the date as YYYY-MM-DD
-            }                       
+              const parsedDate = moment.utc(text).utcOffset(0);
+              return parsedDate.format("YYYY-MM-DD");
+            },
           },
           {
             title: "Action",
@@ -160,6 +171,7 @@ const OrderManagement = () => {
             ),
           },
         ]}
+        
         pagination={false}
       />
 

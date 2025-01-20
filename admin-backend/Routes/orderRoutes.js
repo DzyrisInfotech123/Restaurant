@@ -99,8 +99,6 @@ router.get("/getOrder", async (req, res) => {
     }
 
     const enrichedOrders = orders.map(order => {
-      console.log("Raw date:", order.date);  // Log the raw date
-
       // Ensure the date is in UTC ISO format
       const formattedDate = order.date ? order.date.toISOString() : null;
 

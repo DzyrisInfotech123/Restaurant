@@ -67,15 +67,6 @@ const Dashboard = () => {
         </>
       );
     }
-    if (selectedMenu === '6') {
-      return (
-        <>
-          <h2>Frozen Foods</h2>
-          <FrozenFood />
-          <FrozenFoodTable /> {/* Rendering FrozenFoodTable */}
-        </>
-      );
-    }
     if (selectedMenu === '7') {
       return (
         <>
@@ -110,7 +101,6 @@ const Dashboard = () => {
             <Menu.Item key="3">Add Menu</Menu.Item>
             <Menu.Item key="4">Menu Management</Menu.Item>
             <Menu.Item key="5">Vendor Management</Menu.Item>
-            <Menu.Item key="6">Frozen Food</Menu.Item>
             <Menu.Item key="7">Vendor Product Pricing</Menu.Item>
             <Menu.Item key="8">Order Management</Menu.Item> {/* Add Order Management option */}
           </Menu>

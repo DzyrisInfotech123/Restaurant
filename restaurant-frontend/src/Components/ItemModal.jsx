@@ -94,12 +94,9 @@ const ItemModal = ({ item, closeModal }) => {
         {/* Item Image */}
         <div className="item-img-container">
         <img
-                src={`https://dev.digitalexamregistration.com${item.imgPath}`} // Use the correct path from backend
+                src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`} // Use the correct path from backend
                 alt={item.name}
                 className="menu-img"
-                onError={(e) => {
-                  e.target.src = '/admin-backend/Routes/menuitems'; // Fallback image
-               }}
               />
         </div>
 

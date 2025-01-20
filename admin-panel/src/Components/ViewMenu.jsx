@@ -44,7 +44,7 @@ const ViewMenu = () => {
       description: item.description,
     });
     setAddOns(item.addOns || []); // Load addOns if they exist
-    setFileList(item.imgPath ? [{ url: `https://dev.digitalexamregistration.com${item.imgPath}` }] : []);
+    setFileList(item.imgPath ? [{ url: `https://dev.digitalexamregistration.com/api/${item.imgPath}` }] : []);
   };
 
   const handleSubmitEdit = async (values) => {
@@ -128,7 +128,7 @@ const ViewMenu = () => {
               }}
             >
               <img
-                src={`https://dev.digitalexamregistration.com${restaurant.imgPath}`} // Restaurant image path
+                src={`https://dev.digitalexamregistration.com/api/${restaurant.imgPath}`} // Restaurant image path
                 alt={restaurant.name}
                 style={{ width: '30%', height: '75px', objectFit: 'cover' }} // Adjust image size and fit
               />
@@ -140,7 +140,7 @@ const ViewMenu = () => {
         <>
           <h3>{selectedRestaurant.name} - Menu</h3>
           <img
-            src={`https://dev.digitalexamregistration.com${selectedRestaurant.imgPath}`}
+            src={`https://dev.digitalexamregistration.com/api/${selectedRestaurant.imgPath}`}
             alt={selectedRestaurant.name}
             style={{ width: '14%', height: '155px', objectFit: 'cover' }}
           />
@@ -157,12 +157,9 @@ const ViewMenu = () => {
                   key: 'imgPath',
                   render: (imgPath) => (
                     <img
-                      src={`https://dev.digitalexamregistration.com${imgPath}`}
+                      src={`https://dev.digitalexamregistration.com/api/${imgPath}`}
                       alt="Menu Item"
                       style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.target.src = '/admin-backend/Routes/menuitems'; // Fallback image
-                      }}
                     />
                   ),
                 },
