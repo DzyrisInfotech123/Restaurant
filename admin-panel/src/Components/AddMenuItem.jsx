@@ -33,7 +33,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
                 uid: "-1",
                 name: "existing-image",
                 status: "done",
-                url: `http://localhost:4000${menuItemData.imgPath}`, // Ensure full URL
+                url: `http://localhost:4001${menuItemData.imgPath}`, // Ensure full URL
               },
             ]
           : [],

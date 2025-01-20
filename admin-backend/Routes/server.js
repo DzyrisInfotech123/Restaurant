@@ -12,7 +12,7 @@ const productPricing = require('./ProductPricingRoutes');
 const orderRoutes = require('./orderRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -24,7 +24,7 @@ app.use("/menuitems", express.static(path.join(__dirname, 'menuitems')));
 
 // MongoDB connection
 mongoose.set('strictQuery', true);
-mongoose.connect('mongodb://127.0.0.1:27017/Restaurant-Admins')
+mongoose.connect('mongodb://localhost:27017/Restaurant-Admins')
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.log('MongoDB connection error:', err));
 

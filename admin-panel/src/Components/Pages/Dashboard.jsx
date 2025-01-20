@@ -9,11 +9,12 @@ import RestaurantTable from '../RestaurantTable';
 import MenuManagement from '../AddMenuItem';
 import ViewMenu from '../ViewMenu';
 import VendorManagement from '../VendorManagement';
-import VendorTable from '../VendorTable' // Default import
-import FrozenFood from '../FrozenFood'
-import FrozenFoodTable from '../FrozenFoodTable'
-import VendorProductPricing from '../VendorProductPricing'
-import ViewVendorPricing from '../ViewVendorPricing'
+import VendorTable from '../VendorTable'; // Default import
+import FrozenFood from '../FrozenFood';
+import FrozenFoodTable from '../FrozenFoodTable';
+import VendorProductPricing from '../VendorProductPricing';
+import ViewVendorPricing from '../ViewVendorPricing';
+import OrderManagement from '../OrderManagement'; // Import the OrderManagement component
 
 const { Header, Content, Sider } = Layout;
 
@@ -61,28 +62,36 @@ const Dashboard = () => {
       return (
         <>
           <h2>Vendor Management</h2>
-          <VendorManagement /> 
-          <VendorTable />{/* Rendering VendorManagement */}
+          <VendorManagement />
+          <VendorTable /> {/* Rendering VendorTable */}
         </>
       );
     }
-    // if (selectedMenu === '6') {
-    //   return (
-    //     <>
-    //       <h2>Frozen Foods</h2>
-    //       <FrozenFood/>
-    //       <FrozenFoodTable />{/* Rendering VendorManagement */}
-    //     </>
-    //   );
-    // }
+    if (selectedMenu === '6') {
+      return (
+        <>
+          <h2>Frozen Foods</h2>
+          <FrozenFood />
+          <FrozenFoodTable /> {/* Rendering FrozenFoodTable */}
+        </>
+      );
+    }
     if (selectedMenu === '7') {
-      return(
-      <>
-      <VendorProductPricing />;
-      <ViewVendorPricing />
-      </>
-    )
-       
+      return (
+        <>
+          <h2>Vendor Product Pricing</h2>
+          <VendorProductPricing />
+          <ViewVendorPricing />
+        </>
+      );
+    }
+    if (selectedMenu === '8') {
+      return (
+        <>
+          <h2>Order Management</h2>
+          <OrderManagement /> {/* Render OrderManagement component */}
+        </>
+      );
     }
   };
 
@@ -101,8 +110,9 @@ const Dashboard = () => {
             <Menu.Item key="3">Add Menu</Menu.Item>
             <Menu.Item key="4">Menu Management</Menu.Item>
             <Menu.Item key="5">Vendor Management</Menu.Item>
-            {/* <Menu.Item key="6">Frozen Food</Menu.Item> */}
+            <Menu.Item key="6">Frozen Food</Menu.Item>
             <Menu.Item key="7">Vendor Product Pricing</Menu.Item>
+            <Menu.Item key="8">Order Management</Menu.Item> {/* Add Order Management option */}
           </Menu>
         </Sider>
         <Content style={{ padding: '20px' }}>{renderContent()}</Content>
@@ -111,4 +121,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

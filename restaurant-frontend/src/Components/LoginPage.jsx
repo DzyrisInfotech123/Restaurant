@@ -12,45 +12,49 @@ function LoginPage() {
 
   // Example of handling login response
   const handleLogin = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const username = e.target.username.value;
-  const password = e.target.password.value;
+    setIsLoading(true); // Set loading state to true while making the request
+    setError(null); // Reset error message if any
 
-  try {
-    const response = await axios.post("http://localhost:4000/api/login", {
-      username,
-      password
-    });
+    try {
+      const response = await axios.post("http://localhost:4001/api/login", {
+        username,
+        password,
+      });
 
-    const { token, user, vendor, menuItems } = response.data;
+      const { token, user, vendor, menuItems } = response.data;
 
-    if (token) {
-      // Store token and user data
-      localStorage.setItem("token", token);
-      localStorage.setItem("userId", user._id);
-      localStorage.setItem("role", user.role);
+      if (token) {
+        // Log the token in the console
+        console.log("Token:", token);
 
-      // If the user is a vendor, store vendor info
-      if (vendor) {
-        localStorage.setItem("vendorId", vendor._id);
-        // Optionally, store other vendor info here
+        // Store token and user data
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", user._id);
+        localStorage.setItem("role", user.role);
+
+        // If the user is a vendor, store vendor info
+        if (vendor) {
+          localStorage.setItem("vendorId", vendor._id);
+          // Optionally, store other vendor info here
+        }
+
+        // Store the menu items in localStorage
+        localStorage.setItem("menuItems", JSON.stringify(menuItems));
+
+        // Redirect to home page or dashboard based on the role
+        navigate("/home");
+      } else {
+        alert("Login failed: No token received");
       }
-
-      // Store the menu items in localStorage
-      localStorage.setItem("menuItems", JSON.stringify(menuItems));
-
-      // Redirect to home page or dashboard based on the role
-      window.location.href = "/home";
-    } else {
-      alert("Login failed: No token received");
+    } catch (error) {
+      console.error("Error during login:", error);
+      setError("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false); // Set loading state back to false after request
     }
-  } catch (error) {
-    console.error("Error during login:", error);
-    alert("Login failed. Please check your credentials.");
-  }
-};
-
+  };
 
   return (
     <div className="login-container">

@@ -5,6 +5,7 @@ const router = express.Router();
 // Add User
 router.post('/addUser', async (req, res) => {
   const { username, password, role, vendorId } = req.body;  // Include vendorId in the body
+  const authenticateToken = require('./middleware/authenticateToken');
 
   try {
     // If the role is vendor, ensure vendorId is provided
@@ -25,8 +26,6 @@ router.post('/addUser', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// Get All Users
 router.get('/getUsers', async (req, res) => {
   try {
     const users = await User.find().select('-password');  // Do not return password field
@@ -35,6 +34,25 @@ router.get('/getUsers', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Get All Users
+router.get('/getCartuser', async (req, res) => {
+  try {
+    const username = req.headers['username']; // Extract username from headers
+    if (!username) {
+      return res.status(400).json({ error: "Username is missing" });
+    }
+
+    const user = await User.findOne({ username }).select('-password'); // Find user by username
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user); // Return user data
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Delete User
 router.delete('/deleteUser/:id', async (req, res) => {

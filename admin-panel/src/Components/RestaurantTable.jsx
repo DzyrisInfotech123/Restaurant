@@ -68,13 +68,15 @@ const RestaurantTable = () => {
       dataIndex: 'imgPath',
       key: 'imgPath',
       render: (text, record) => {
-        const imageUrl = `http://localhost:4000${record.imgPath}`; // Avoid double slash issue
+        const imageUrl = `http://localhost:4001${record.imgPath}`; // Avoid double slash issue
         return (
           <img
             src={imageUrl}
             alt="Restaurant"
             style={{ width: '50px', height: '50px' }}
+            
           />
+          
         );
       },
     },

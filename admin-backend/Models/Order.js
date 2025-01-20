@@ -1,33 +1,22 @@
-// models/Order.js
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-  orderNumber: { type: Number, required: true, unique: true },
-  date: { type: Date, required: true },
-  subtotal: { type: Number, required: true },
-  taxes: { type: Number, required: true },
-  total: { type: Number, required: true },
-
-  // Cart items
+  orderNumber: { type: String, unique: true, required: true },
   cart: [
     {
-      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-      restaurantId: { type: mongoose.Schema.Types.ObjectId, required: true },
+      vendorId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Vendor" },
+      restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" },
       name: { type: String, required: true },
       price: { type: Number, required: true },
       quantity: { type: Number, required: true },
       totalPrice: { type: Number, required: true },
-      description: { type: String },
-      imgPath: { type: String },
-      type: { type: String },
-      addOns: [
-        {
-          name: { type: String },
-          price: { type: Number },
-        },
-      ],
-    },
+      imgPath: { type: String }, // New field for image path
+    }
   ],
+  subtotal: { type: Number, required: true },
+  taxes: { type: Number, required: true },
+  total: { type: Number, required: true },
+  date: { type: Date, required: true }
 });
 
 module.exports = mongoose.model("Order", orderSchema);

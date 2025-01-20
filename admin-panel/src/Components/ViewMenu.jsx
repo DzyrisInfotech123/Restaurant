@@ -44,7 +44,7 @@ const ViewMenu = () => {
       description: item.description,
     });
     setAddOns(item.addOns || []); // Load addOns if they exist
-    setFileList(item.imgPath ? [{ url: `http://localhost:4000${item.imgPath}` }] : []);
+    setFileList(item.imgPath ? [{ url: `http://localhost:4001${item.imgPath}` }] : []);
   };
 
   const handleSubmitEdit = async (values) => {
@@ -128,7 +128,7 @@ const ViewMenu = () => {
               }}
             >
               <img
-                src={`http://localhost:4000${restaurant.imgPath}`} // Restaurant image path
+                src={`http://localhost:4001${restaurant.imgPath}`} // Restaurant image path
                 alt={restaurant.name}
                 style={{ width: '30%', height: '75px', objectFit: 'cover' }} // Adjust image size and fit
               />
@@ -140,7 +140,7 @@ const ViewMenu = () => {
         <>
           <h3>{selectedRestaurant.name} - Menu</h3>
           <img
-            src={`http://localhost:4000${selectedRestaurant.imgPath}`}
+            src={`http://localhost:4001${selectedRestaurant.imgPath}`}
             alt={selectedRestaurant.name}
             style={{ width: '14%', height: '155px', objectFit: 'cover' }}
           />
@@ -157,7 +157,7 @@ const ViewMenu = () => {
                   key: 'imgPath',
                   render: (imgPath) => (
                     <img
-                      src={`http://localhost:4000${imgPath}`}
+                      src={`http://localhost:4001${imgPath}`}
                       alt="Menu Item"
                       style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                       onError={(e) => {

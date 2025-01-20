@@ -19,7 +19,7 @@ const AddRestaurant = ({ restaurantData, onUpdateSuccess }) => {
                 uid: "-1",
                 name: "existing-image",
                 status: "done",
-                url: `http://localhost:4000${restaurantData.imgPath}`, // Ensure full URL
+                url: `http://localhost:4001${restaurantData.imgPath}`, // Ensure full URL
               },
             ]
           : [],
@@ -52,8 +52,8 @@ const AddRestaurant = ({ restaurantData, onUpdateSuccess }) => {
       }
 
       const endpoint = isEditing
-        ? `http://localhost:4000/api/editRestaurant/${restaurantData._id}`
-        : "http://localhost:4000/api/addRestaurant";
+        ? `http://localhost:4001/api/editRestaurant/${restaurantData._id}`
+        : "http://localhost:4001/api/addRestaurant";
 
       const method = isEditing ? "put" : "post";
 

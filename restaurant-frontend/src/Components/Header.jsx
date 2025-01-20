@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Import useNavigate to programmatically navigate
 import { CartContext } from "./CartContext";
 import CartModal from "./CartModal";
 import "./Header.css";
+
 
 const Header = () => {
   const { cart } = useContext(CartContext);
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const toggleCartModal = () => {
     setCartModalOpen(!isCartModalOpen);
@@ -31,6 +33,12 @@ const Header = () => {
     };
   }, []);
 
+  // Function to handle "Your Orders" click
+  const handleOrdersClick = () => {
+    navigate("/order-confirmation"); // Navigate to OrderConfirmation page
+    setIsDropdownOpen(false); // Close the dropdown menu after navigation
+  };
+
   return (
     <header className="header flex justify-between items-center py-4">
       <div className="flex items-center space-x-4">
@@ -51,7 +59,7 @@ const Header = () => {
               <li>
                 <i className="fas fa-user-circle"></i> Profile
               </li>
-              <li>
+              <li onClick={handleOrdersClick}>
                 <i className="fas fa-box"></i> Your Orders
               </li>
               <li>
