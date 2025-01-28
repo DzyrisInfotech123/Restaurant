@@ -22,8 +22,17 @@ const ViewVendorPricing = () => {
     const fetchVendors = async () => {
       setLoadingVendors(true);
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/getVendor");
-        setVendors(response.data);
+        const response = await axios.get(
+          "https://dev.digitalexamregistration.com/getVendor"
+        );
+        console.log("Vendors API Response:", response.data); // Debug API response
+
+        // Check if the response data matches the expected structure
+        if (Array.isArray(response.data)) {
+          setVendors(response.data);
+        } else {
+          message.warning("Unexpected API response for vendors.");
+        }
       } catch (error) {
         message.error("Error fetching vendors.");
         console.error("Error:", error);
@@ -41,9 +50,11 @@ const ViewVendorPricing = () => {
 
       setLoadingRestaurants(true);
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/api/getRestaurant", {
-          params: { vendorId: selectedVendor },
-        });
+        const response = await axios.get(
+          "https://dev.digitalexamregistration.com/api/getRestaurant",
+          { params: { vendorId: selectedVendor } }
+        );
+        console.log("Restaurants API Response:", response.data); // Debug API response
         setRestaurants(response.data);
       } catch (error) {
         message.error("Error fetching restaurants.");
@@ -62,9 +73,12 @@ const ViewVendorPricing = () => {
 
       setLoadingMenuItems(true);
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/api/getProductPricing", {
-          params: { restaurantId: selectedRestaurant, vendorId: selectedVendor },
-        });
+        const response = await axios.get(
+          "https://dev.digitalexamregistration.com/api/getProductPricing",
+          { params: { restaurantId: selectedRestaurant, vendorId: selectedVendor } }
+        );
+
+        console.log("Menu Items API Response:", response.data); // Debug API response
 
         if (response.data && response.data.pricing) {
           const menuData = response.data.pricing.map((item) => ({
@@ -74,7 +88,7 @@ const ViewVendorPricing = () => {
           }));
           setMenuItems(menuData);
         } else {
-          message.warning('No pricing data found.');
+          message.warning("No pricing data found.");
         }
       } catch (error) {
         message.error("Error fetching menu items.");
@@ -110,12 +124,17 @@ const ViewVendorPricing = () => {
             style={{ width: "100%" }}
             loading={loadingVendors}
           >
-            <Option value="">Select Vendor</Option>
-            {vendors.map((vendor) => (
-              <Option key={vendor._id} value={vendor._id}>
-                {vendor.vendorName}
+            {vendors.length > 0 ? (
+              vendors.map((vendor) => (
+                <Option key={vendor._id} value={vendor._id}>
+                  {vendor.vendorName || "Unnamed Vendor"} {/* Fallback if vendorName is missing */}
+                </Option>
+              ))
+            ) : (
+              <Option value="" disabled>
+                No Vendors Available
               </Option>
-            ))}
+            )}
           </Select>
         </Col>
 
@@ -129,12 +148,17 @@ const ViewVendorPricing = () => {
               style={{ width: "100%" }}
               loading={loadingRestaurants}
             >
-              <Option value="">Select Restaurant</Option>
-              {restaurants.map((restaurant) => (
-                <Option key={restaurant._id} value={restaurant._id}>
-                  {restaurant.name}
+              {restaurants.length > 0 ? (
+                restaurants.map((restaurant) => (
+                  <Option key={restaurant._id} value={restaurant._id}>
+                    {restaurant.name}
+                  </Option>
+                ))
+              ) : (
+                <Option value="" disabled>
+                  No Restaurants Available
                 </Option>
-              ))}
+              )}
             </Select>
           </Col>
         )}

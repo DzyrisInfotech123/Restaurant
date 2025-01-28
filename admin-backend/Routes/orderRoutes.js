@@ -144,4 +144,41 @@ router.get("/searchOrders", async (req, res) => {
   }
 });
 
+// Edit an existing order
+// Edit an existing order
+// Edit an existing order by order number
+router.put("/updateOrder/:orderNumber", async (req, res) => {
+  const { orderNumber } = req.params; // Extract orderNumber from the URL
+  const updatedOrderData = req.body;
+
+  console.log("Received request to update order:", orderNumber);
+  console.log("Request body:", updatedOrderData);
+
+  try {
+      // Find the order by orderNumber
+      const order = await Order.findOne({ orderNumber });
+
+      if (!order) {
+          return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Update the entire order, including the cart and other fields
+      order.cart = updatedOrderData.cart; // Update the cart with the new items
+      order.subtotal = updatedOrderData.subtotal || order.subtotal; // Update the subtotal if provided
+      order.taxes = updatedOrderData.taxes || order.taxes; // Update the taxes if provided
+      order.total = updatedOrderData.total || order.total; // Update the total if provided
+      order.date = updatedOrderData.date || order.date; // Update the date if provided
+
+      // Save the updated order to the database
+      const updatedOrder = await order.save();
+
+      // Return the updated order
+      res.json(updatedOrder);
+  } catch (error) {
+      console.error("Error updating order :", error);
+      res.status(500).json({ error: "Failed to update order", details: error.message });
+  }
+});
+
+
 module.exports = router;

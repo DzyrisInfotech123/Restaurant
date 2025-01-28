@@ -1,28 +1,59 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../Services/Api"; // Ensure this points to your Axios setup
 import "./Login.css"; // Import your CSS for styling
 
 function Login() {
-  const [username, setUsername] = useState(""); 
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+
     setIsLoading(true);
     setError(null);
 
-    // Simulate login logic (replace this with your backend logic)
-    setTimeout(() => {
-      if (username === "admin" && password === "admin123") {
-        navigate("dashboard"); // Redirect to dashboard
+    try {
+      // Make an API call to your login endpoint
+      const response = await axios.post("https://dev.digitalexamregistration.com/api/login", {
+        username,
+        password,
+      });
+
+      const { token, user, vendor, menuItems } = response.data;
+
+      if (token) {
+        // Log the token for debugging
+        console.log("Token:", token);
+
+        // Store token and user data in localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", user._id);
+        localStorage.setItem("role", user.role);
+
+        // Store vendor info if the user is a vendor
+        if (vendor) {
+          localStorage.setItem("vendorId", vendor._id);
+          // Optionally, store other vendor details
+        }
+
+        // Store menu items if available
+        localStorage.setItem("menuItems", JSON.stringify(menuItems));
+
+        // Redirect to dashboard or home page based on the role
+        navigate("/dashboard");
       } else {
-        setError("Invalid username or password");
+        setError("Login failed: No token received");
       }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Invalid username or password.");
+    } finally {
       setIsLoading(false);
-    }, 1000); // Simulating an API call
+    }
   };
 
   return (
@@ -60,11 +91,7 @@ function Login() {
             />
           </div>
           {error && <p className="error-message">{error}</p>}
-          <button
-            type="submit"
-            className="login-button"
-            disabled={isLoading}
-          >
+          <button type="submit" className="login-button" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>

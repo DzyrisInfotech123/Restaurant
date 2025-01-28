@@ -4,28 +4,33 @@ const router = express.Router();
 
 // Add User
 router.post('/addUser', async (req, res) => {
-  const { username, password, role, vendorId } = req.body;  // Include vendorId in the body
-  const authenticateToken = require('./middleware/authenticateToken');
+  const { username, password, role, vendorId } = req.body;
+
+  // Validate request data
+  if (!username || !password || !role) {
+      return res.status(400).json({ error: 'Username, password, and role are required.' });
+  }
+
+  if (role === 'vendor' && !vendorId) {
+      return res.status(400).json({ error: 'Vendor ID is required for the vendor role.' });
+  }
 
   try {
-    // If the role is vendor, ensure vendorId is provided
-    if (role === 'vendor' && !vendorId) {
-      return res.status(400).json({ error: 'Vendor ID is required for the vendor role' });
-    }
+      const newUser = new User({
+          username,
+          password,
+          role,
+          vendorId: role === 'vendor' ? vendorId : undefined,
+      });
 
-    const newUser = new User({
-      username,
-      password,
-      role,
-      vendorId: role === 'vendor' ? vendorId : undefined,  // Assign vendorId only if role is 'vendor'
-    });
-
-    await newUser.save();
-    res.status(201).json({ message: 'User added successfully' });
+      await newUser.save();
+      res.status(201).json({ message: 'User added successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+      console.error('Error saving user:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 router.get('/getUsers', async (req, res) => {
   try {
     const users = await User.find().select('-password');  // Do not return password field

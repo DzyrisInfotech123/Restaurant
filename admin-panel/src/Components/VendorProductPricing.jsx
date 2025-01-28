@@ -5,98 +5,100 @@ import axios from "axios";
 const { Option } = Select;
 
 const VendorProductPricing = () => {
-  const [vendors, setVendors] = useState([]); // State to store vendor list
-  const [restaurants, setRestaurants] = useState([]); // State to store restaurant list based on selected vendor
-  const [menuItems, setMenuItems] = useState([]); // State to store menu items based on selected restaurant and vendor
-  const [selectedVendor, setSelectedVendor] = useState(null); // State to store selected vendor
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null); // State to store selected restaurant
-  const [productPricing, setProductPricing] = useState({}); // State to store product pricing for each product
+  const [vendors, setVendors] = useState([]); // List of vendors
+  const [restaurants, setRestaurants] = useState([]); // List of restaurants
+  const [menuItems, setMenuItems] = useState([]); // List of menu items
+  const [selectedVendor, setSelectedVendor] = useState(null); // Selected vendor
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null); // Selected restaurant
+  const [productPricing, setProductPricing] = useState({}); // Pricing state
 
-  // Fetch vendors on initial load
+  // Fetch vendors on load
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/api/getVendor");
+        const response = await axios.get(
+          "https://dev.digitalexamregistration.com/api/getVendor"
+        );
         setVendors(response.data);
       } catch (error) {
         message.error("Error fetching vendors.");
-        console.error("Error:", error);
+        console.error(error);
       }
     };
-
     fetchVendors();
   }, []);
 
-  // Fetch restaurants when a vendor is selected
+  // Fetch restaurants when vendor is selected
   useEffect(() => {
     const fetchRestaurants = async () => {
       if (!selectedVendor) return;
 
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/api/getRestaurant", {
-          params: { vendorId: selectedVendor },
-        });
+        const response = await axios.get(
+          "https://dev.digitalexamregistration.com/api/getRestaurant",
+          { params: { vendorId: selectedVendor } }
+        );
         setRestaurants(response.data);
       } catch (error) {
         message.error("Error fetching restaurants.");
-        console.error("Error:", error);
+        console.error(error);
       }
     };
-
     fetchRestaurants();
   }, [selectedVendor]);
 
-  // Fetch menu items and pricing when a restaurant and vendor are selected
+  // Fetch menu items and pricing when restaurant and vendor are selected
   useEffect(() => {
-    const fetchMenuItems = async () => {
-      if (!selectedRestaurant || !selectedVendor) return;
-  
+    const fetchMenuItemsAndPricing = async () => {
+      if (!selectedVendor || !selectedRestaurant) return;
+
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/api/getMenuItems", {
-          params: { restaurantId: selectedRestaurant, vendorId: selectedVendor },
-        });
-        setMenuItems(response.data);
-  
-        // Fetch the existing pricing for the selected vendor and restaurant
-        const pricingResponse = await axios.get("https://dev.digitalexamregistration.com/api/getProductPricing", {
-          params: { vendorId: selectedVendor, restaurantId: selectedRestaurant },
-        });
-  
-        // Ensure pricingResponse.data.pricing is an array before using reduce
+        // Fetch menu items
+        const menuResponse = await axios.get(
+          "https://dev.digitalexamregistration.com/api/getMenuItems",
+          { params: { vendorId: selectedVendor, restaurantId: selectedRestaurant } }
+        );
+        setMenuItems(menuResponse.data);
+
+        // Fetch pricing data
+        const pricingResponse = await axios.get(
+          "https://dev.digitalexamregistration.com/api/getProductPricing",
+          { params: { vendorId: selectedVendor, restaurantId: selectedRestaurant } }
+        );
+
         if (Array.isArray(pricingResponse.data.pricing)) {
-          const pricingData = pricingResponse.data.pricing.reduce((acc, pricing) => {
-            acc[pricing.menuItemId._id] = pricing.price;
+          // Map prices to product IDs
+          const pricingMap = pricingResponse.data.pricing.reduce((acc, item) => {
+            acc[item.menuItemId._id] = item.price;
             return acc;
           }, {});
-  
-          setProductPricing(pricingData); // Set the pricing in state
+          setProductPricing(pricingMap);
         } else {
-          console.error("Invalid data structure received from the pricing API:", pricingResponse.data);
+          message.warning("No pricing data found.");
         }
       } catch (error) {
         message.error("Error fetching menu items or pricing.");
-        console.error("Error:", error);
+        console.error(error);
       }
     };
-  
-    fetchMenuItems();
-  }, [selectedRestaurant, selectedVendor]);
-  
+    fetchMenuItemsAndPricing();
+  }, [selectedVendor, selectedRestaurant]);
+
   // Handle vendor change
   const handleVendorChange = (value) => {
     setSelectedVendor(value);
     setSelectedRestaurant(null);
     setMenuItems([]);
-    setProductPricing({}); // Clear product pricing on vendor change
+    setProductPricing({});
   };
 
   // Handle restaurant change
   const handleRestaurantChange = (value) => {
     setSelectedRestaurant(value);
-    setProductPricing({}); // Clear previous pricing when restaurant changes
+    setProductPricing({});
   };
 
-  // Handle rate change for a specific product
+  // Handle rate change
   const handleRateChange = (menuItemId, value) => {
     setProductPricing((prev) => ({
       ...prev,
@@ -111,30 +113,24 @@ const VendorProductPricing = () => {
       return;
     }
 
-    // Prepare the pricing data for each menu item
     const pricingData = Object.keys(productPricing).map((menuItemId) => ({
-      menuItemId, // Ensure this is the correct reference for MenuItem
+      menuItemId,
       vendorId: selectedVendor,
       restaurantId: selectedRestaurant,
       price: productPricing[menuItemId],
     }));
 
     try {
-      // Send the pricing data to the backend
       const response = await axios.post(
         "https://dev.digitalexamregistration.com/api/addProductPricing",
-        {
-          vendorId: selectedVendor,
-          restaurantId: selectedRestaurant,
-          pricingData: pricingData,
-        }
+        { vendorId: selectedVendor, restaurantId: selectedRestaurant, pricingData }
       );
       if (response.status === 200 || response.status === 201) {
         message.success("Product pricing updated successfully!");
       }
     } catch (error) {
       message.error("Error saving product pricing.");
-      console.error("Error:", error);
+      console.error(error);
     }
   };
 
