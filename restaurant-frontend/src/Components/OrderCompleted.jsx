@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Stepper,
   Step,
@@ -9,18 +9,14 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useLocation, useNavigate } from "react-router-dom";
-import "./OrderConfirmation.css";
-import Header from "./Header";
 import moment from "moment";
+import "./OrderConfirmation.css"; // Reuse the same styles
+import Header from "./Header";
 
-const OrderConfirmation = () => {
+const OrderCompleted = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [deliveredOrders, setDeliveredOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Use useNavigate for navigation
+  const { deliveredOrders } = location.state || { deliveredOrders: [] }; // Get delivered orders from state
 
   const trackingSteps = [
     { label: "Booked", icon: "fas fa-cart-plus" },
@@ -31,75 +27,6 @@ const OrderConfirmation = () => {
     { label: "Delivered", icon: "fas fa-clipboard-check" },
   ];
 
-  // Fetch orders
-  useEffect(() => {
-    const vendorId = localStorage.getItem("vendorId");
-
-    const fetchOrders = async () => {
-      if (!vendorId) {
-        setError("Vendor ID is missing.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get(
-          `https://dev.digitalexamregistration.com/api/getOrders?vendorId=${vendorId}`
-        );
-        if (response.data && response.data.length === 0) {
-          setOrders([]);
-        } else {
-          const updatedOrders = response.data.map((order) => {
-            let currentStep = 0;
-            let stepDates = [];
-
-            if (order.status === "confirmed") {
-              currentStep = 1;
-              stepDates[0] = moment().format('MMMM DD, YYYY');
-            } else if (order.status === "processing") {
-              currentStep = 2;
-              stepDates[0] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().format('MMMM DD, YYYY');
-            } else if (order.status === "packed") {
-              currentStep = 3;
-              stepDates[0] = moment().subtract(2, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[2] = moment().format('MMMM DD, YYYY');
-            } else if (order.status === "shipped") {
-              currentStep = 4;
-              stepDates[0] = moment().subtract(3, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().subtract(2, 'days').format('MMMM DD, YYYY');
-              stepDates[2] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[3] = moment().format('MMMM DD, YYYY');
-            } else if (order.status === "delivered") {
-              currentStep = 5;
-              stepDates[0] = moment().subtract(4, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().subtract(3, 'days').format('MMMM DD, YYYY');
-              stepDates[2] = moment().subtract(2, 'days').format('MMMM DD, YYYY');
-              stepDates[3] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[4] = moment().format('MMMM DD, YYYY');
-            }
-
-            return { ...order, currentStep, stepDates };
-          });
-
-          const activeOrders = updatedOrders.filter(order => order.status !== "delivered");
-          const completedOrders = updatedOrders.filter(order => order.status === "delivered");
-
-          setOrders(activeOrders);
-          setDeliveredOrders(completedOrders);
-        }
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError("Failed to fetch order details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
   const formatDate = (date) => {
     const parsedDate = moment(date);
     if (!parsedDate.isValid()) {
@@ -108,32 +35,21 @@ const OrderConfirmation = () => {
     return parsedDate.format('MMMM DD, YYYY');
   };
 
-  const handleViewCompletedOrders = () => {
-    navigate("/order-completed", { state: { deliveredOrders } });
-  };
-
-  if (loading) return <div>Loading...</div>;
-
   return (
     <div className="order-confirmation">
       <Header />
-      <h2>Order Status</h2>
-      <div className="button-container">
-        <button className="back" onClick={() => (window.location.href = "/home")}>
-          Back to Restaurants
-        </button>
-        <button className="view-completed" onClick={handleViewCompletedOrders}>
-          View Completed Orders
-        </button>
-      </div>
+      <h2>Completed Orders</h2>
+       {/* Back to Restaurants Button */}
+       <button className="back" onClick={() => navigate("/home")}>
+        Back to Restaurants
+      </button>
 
-      {error || orders.length === 0 ? (
+      {deliveredOrders.length === 0 ? (
         <div className="no-orders">
-          <h3>You have no orders</h3>
-          <p>There are no orders associated with your account at the moment.</p>
+          <h3>No completed orders found.</h3>
         </div>
       ) : (
-        orders.map((order) => {
+        deliveredOrders.map((order) => {
           const { cart = [], subtotal = 0, total = 0, orderNumber, orderDate, taxes = 0, currentStep, stepDates } = order;
 
           const formattedOrderDate = formatDate(orderDate);
@@ -241,8 +157,10 @@ const OrderConfirmation = () => {
           );
         })
       )}
+
+     
     </div>
   );
 };
 
-export default OrderConfirmation;
+export default OrderCompleted;

@@ -1,0 +1,89 @@
+/* Section Styles for Order Completed */
+.order-completed {
+    padding: 1rem;
+    background-color: #f9fafb;
+    font-family: Arial, sans-serif;
+}
+
+/* Header Styles */
+.order-completed h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff1547;
+    margin-bottom: 0.5rem;
+}
+
+/* Completed Order Item Styles */
+.completed-order {
+    background-color: #ffffff;
+    padding: 1rem; /* Increased padding for better spacing */
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+    margin-bottom: 1rem;
+    transition: box-shadow 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.completed-order:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Shadow on hover */
+}
+
+.completed-order h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ff1547;
+    margin: 0.25rem 0 0.5rem;
+}
+
+.completed-order p {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+/* Price Information */
+.completed-order .total {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ff1547;
+}
+
+/* Back Button Styles */
+.back {
+    background-color: #ff1547; /* Same color as headers */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+    display: inline-block; /* Ensure it behaves like a button */
+}
+
+.back:hover {
+    background-color: #e63946; /* Darker shade for hover effect */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .order-completed {
+        padding: 0.5rem;
+    }
+
+    .completed-order {
+        padding: 0.75rem; /* Adjusted padding for smaller screens */
+    }
+
+    .completed-order h3 {
+        font-size: 1.1rem; /* Slightly smaller font size */
+    }
+
+    .completed-order p {
+        font-size: 0.875rem; /* Consistent font size */
+    }
+
+    .back {
+        width: 100%; /* Full width on smaller screens */
+        margin-top: 1rem; /* Space above the button */
+    }
+}

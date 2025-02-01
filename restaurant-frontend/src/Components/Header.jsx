@@ -39,11 +39,17 @@ const Header = () => {
     navigate("/order-confirmation"); // Navigate to OrderConfirmation page
     setIsDropdownOpen(false); // Close the dropdown menu after navigation
   };
-
+  const handleLogin = () => {
+    navigate("/"); // Navigate to OrderConfirmation page
+    setIsDropdownOpen(false); // Close the dropdown menu after navigation
+  };
+  const handleHome = () => {
+    navigate("/home"); // Navigate to OrderConfirmation page // Close the dropdown menu after navigation
+  };
   return (
     <header className="header flex justify-between items-center py-4">
       <div className="flex items-center space-x-4">
-  <img src={logo} alt="Dzyris Frozen Foods" className="logo" />
+  <img src={logo} alt="Dzyris Frozen Foods" className="logo" onClick={handleHome}/>
 </div>
       <div className="flex items-center space-x-4">
         {/* Profile Button with Dropdown */}
@@ -61,7 +67,7 @@ const Header = () => {
               <li onClick={handleOrdersClick}>
                 <i className="fas fa-box"></i> Your Orders
               </li>
-              <li>
+              <li onClick={handleLogin}>
                 <i className="fas fa-sign-out-alt"></i> Logout
               </li>
             </ul>
