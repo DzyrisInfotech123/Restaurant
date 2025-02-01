@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // Import useLocation hook
 import ItemModal from "./ItemModal"; // Import the ItemModal
 import "./Menu.css";
 
@@ -12,6 +13,17 @@ const Menu = ({ restaurant, addToCart }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updatedMenuItems, setUpdatedMenuItems] = useState([]);
+  const [priceType, setPriceType] = useState("sale"); // Added state for price type (purchase or sale)
+
+  const location = useLocation(); // Get location
+  const { priceType: queryPriceType } = location.state || {}; // Extract priceType from state
+
+  // If the priceType is passed in state, update the priceType
+  useEffect(() => {
+    if (queryPriceType) {
+      setPriceType(queryPriceType);
+    }
+  }, [queryPriceType]);
 
   const menuTypes = ["All", ...new Set(menuItems.map((item) => item.type))];
 
@@ -71,7 +83,10 @@ const Menu = ({ restaurant, addToCart }) => {
             (pricing) => pricing.menuItemId._id.toString() === item._id.toString()
           );
           if (pricingForItem) {
-            return { ...item, price: pricingForItem.price };
+            return { 
+              ...item, 
+              price: priceType === "sale" ? pricingForItem.salePrice : pricingForItem.purchasePrice 
+            };
           }
           return item;
         });
@@ -83,7 +98,7 @@ const Menu = ({ restaurant, addToCart }) => {
     };
 
     fetchProductPricing();
-  }, [selectedVendor, menuItems, restaurant._id]);
+  }, [selectedVendor, menuItems, restaurant._id, priceType]); // Add priceType to dependency array
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -127,6 +142,16 @@ const Menu = ({ restaurant, addToCart }) => {
         </button>
       </div>
 
+      {/* Price type dropdown is permanently hidden */}
+      {/* <div className="price-type-select">
+        <label htmlFor="price-type">Select Price Type: </label>
+        <select id="price-type" value={priceType} onChange={(e) => setPriceType(e.target.value)}>
+          <option value="sale">Sale Price</option>
+          <option value="purchase">Purchase Price</option>
+        </select>
+      </div> */}
+
+      {/* Filter options for menu items */}
       <div className="filter-options">
         {menuTypes.map((type) => (
           <button

@@ -4,84 +4,77 @@ import React, { createContext, useState, useEffect } from "react";
 export const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
-  // Track the current vendor ID (e.g., from the logged-in user or session)
   const [vendorId, setVendorId] = useState(localStorage.getItem("vendorId") || null);
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale");
 
-  // Initialize cart for a specific vendor from localStorage
+  // Initialize cart for vendor and price type
   const [cart, setCart] = useState(() => {
     if (vendorId) {
-      const storedCart = localStorage.getItem(`cart_${vendorId}`);
-      console.log(`Loading cart for vendor ${vendorId}:`, storedCart); // Debugging log
+      const storedCart = localStorage.getItem(`cart_${vendorId}_${priceType}`);
       return storedCart ? JSON.parse(storedCart) : [];
     }
     return [];
   });
 
-  // Save cart to localStorage for the specific vendor whenever it changes
+  // Save cart when it changes
   useEffect(() => {
     if (vendorId) {
-      console.log("Saving cart for vendor:", vendorId, cart); // Debugging log
-      localStorage.setItem(`cart_${vendorId}`, JSON.stringify(cart));
+      localStorage.setItem(`cart_${vendorId}_${priceType}`, JSON.stringify(cart));
     }
-  }, [cart, vendorId]);
+  }, [cart, vendorId, priceType]);
 
-  // Set the vendor ID (this could be done after login or when selecting a vendor)
+  // Change vendor and reset cart
   const setVendor = (id) => {
-    console.log("Setting vendor ID:", id); // Debugging log
     setVendorId(id);
-    localStorage.setItem("vendorId", id); // Save vendorId in localStorage
+    localStorage.setItem("vendorId", id);
+    loadCart(id, priceType);
+  };
 
-    // When the vendor changes, load their cart
-    const storedCart = localStorage.getItem(`cart_${id}`);
-    console.log(`Cart for vendor ${id}:`, storedCart); // Debugging log
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    } else {
-      setCart([]); // Default to an empty cart if no cart exists for this vendor
+  // Change price type and reset cart
+  const changePriceType = (type) => {
+    setPriceType(type);
+    localStorage.setItem("priceType", type);
+    if (vendorId) {
+      loadCart(vendorId, type);
     }
   };
 
-  // Add to cart function
+  // Load cart for vendor and price type
+  const loadCart = (vendorId, type) => {
+    const storedCart = localStorage.getItem(`cart_${vendorId}_${type}`);
+    setCart(storedCart ? JSON.parse(storedCart) : []);
+  };
+
+  // Add to cart
   const addToCart = (item) => {
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex((cartItem) => cartItem.id === item.id);
-
       if (existingItemIndex !== -1) {
-        // If item exists, update quantity and total price
         const updatedCart = [...prevCart];
         updatedCart[existingItemIndex].quantity = item.quantity;
-        updatedCart[existingItemIndex].totalPrice = item.totalPrice || item.price * item.quantity; // Update total price
-        localStorage.setItem(`cart_${vendorId}`, JSON.stringify(updatedCart)); // Save updated cart for vendor
+        updatedCart[existingItemIndex].totalPrice = item.totalPrice || item.price * item.quantity;
         return updatedCart;
       } else {
-        // If item is new, add it
-        const updatedCart = [...prevCart, item];
-        localStorage.setItem(`cart_${vendorId}`, JSON.stringify(updatedCart)); // Save updated cart for vendor
-        return updatedCart;
+        return [...prevCart, item];
       }
     });
   };
 
-  // Remove from cart function
+  // Remove from cart
   const removeFromCart = (itemId) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter((item) => item.id !== itemId);
-      localStorage.setItem(`cart_${vendorId}`, JSON.stringify(updatedCart)); // Save updated cart for vendor
-      return updatedCart;
-    });
+    setCart((prevCart) => prevCart.filter((item) => item.id !== itemId));
   };
 
-  // Clear cart function
+  // Clear cart
   const clearCart = () => {
-    setCart([]); // Clears the cart for the current vendor
+    setCart([]);
     if (vendorId) {
-      console.log("Clearing cart for vendor:", vendorId); // Debugging log
-      localStorage.removeItem(`cart_${vendorId}`); // Remove cart from localStorage
+      localStorage.removeItem(`cart_${vendorId}_${priceType}`);
     }
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, setVendor }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, setVendor, changePriceType, priceType }}>
       {children}
     </CartContext.Provider>
   );

@@ -168,6 +168,7 @@ router.put("/updateOrder/:orderNumber", async (req, res) => {
       order.taxes = updatedOrderData.taxes || order.taxes; // Update the taxes if provided
       order.total = updatedOrderData.total || order.total; // Update the total if provided
       order.date = updatedOrderData.date || order.date; // Update the date if provided
+      order.status = updatedOrderData.status || order.status; // Update the status if provided
 
       // Save the updated order to the database
       const updatedOrder = await order.save();

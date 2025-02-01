@@ -19,15 +19,14 @@ const OrderConfirmation = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentStep, setCurrentStep] = useState(0);
 
   const trackingSteps = [
-    { label: "Booked", icon: "fas fa-cart-plus", date: "Jan 01, 2025" },
-    { label: "Confirmed", icon: "fas fa-check-circle", date: "Jan 02, 2025" },
-    { label: "Processing", icon: "fas fa-concierge-bell", date: "Jan 03, 2025" },
-    { label: "Packed", icon: "fas fa-box", date: "Jan 04, 2025" },
-    { label: "Shipped", icon: "fas fa-truck", date: "Jan 05, 2025" },
-    { label: "Delivered", icon: "fas fa-clipboard-check", date: "Jan 12, 2025" },
+    { label: "Booked", icon: "fas fa-cart-plus" },
+    { label: "Confirmed", icon: "fas fa-check-circle" },
+    { label: "Processing", icon: "fas fa-concierge-bell" },
+    { label: "Packed", icon: "fas fa-box" },
+    { label: "Shipped", icon: "fas fa-truck" },
+    { label: "Delivered", icon: "fas fa-clipboard-check" },
   ];
 
   // Fetch orders
@@ -49,7 +48,42 @@ const OrderConfirmation = () => {
           // No orders found
           setOrders([]);  // Clear the orders state, indicating no orders.
         } else {
-          setOrders(response.data);  // Set fetched orders
+          // Set orders and update current step based on order status
+          const updatedOrders = response.data.map((order) => {
+            let currentStep = 0;
+            let stepDates = []; // Array to hold the dates for each step
+
+            // Determine the current step and populate stepDates
+            if (order.status === "confirmed") {
+              currentStep = 1;
+              stepDates[0] = moment().format('MMMM DD, YYYY'); // Booked date
+            } else if (order.status === "processing") {
+              currentStep = 2;
+              stepDates[0] = moment().subtract(1, 'days').format('MMMM DD, YYYY'); // Booked date
+              stepDates[1] = moment().format('MMMM DD, YYYY'); // Confirmed date
+            } else if (order.status === "packed") {
+              currentStep = 3;
+              stepDates[0] = moment().subtract(2, 'days').format('MMMM DD, YYYY'); // Booked date
+              stepDates[1] = moment().subtract(1, 'days').format('MMMM DD, YYYY'); // Confirmed date
+              stepDates[2] = moment().format('MMMM DD, YYYY'); // Processing date
+            } else if (order.status === "shipped") {
+              currentStep = 4;
+              stepDates[0] = moment().subtract(3, 'days').format('MMMM DD, YYYY'); // Booked date
+              stepDates[1] = moment().subtract(2, 'days').format('MMMM DD, YYYY'); // Confirmed date
+              stepDates[2] = moment().subtract(1, 'days').format('MMMM DD, YYYY'); // Processing date
+              stepDates[3] = moment().format('MMMM DD, YYYY'); // Packed date
+            } else if (order.status === "delivered") {
+              currentStep = 5;
+              stepDates[0] = moment().subtract(4, 'days').format('MMMM DD, YYYY'); // Booked date
+              stepDates[1] = moment().subtract(3, 'days').format('MMMM DD, YYYY'); // Confirmed date
+              stepDates[2] = moment().subtract(2, 'days').format('MMMM DD, YYYY'); // Processing date
+              stepDates[3] = moment().subtract(1, 'days').format('MMMM DD, YYYY'); // Packed date
+              stepDates[4] = moment().format('MMMM DD, YYYY'); // Shipped date
+            }
+
+            return { ...order, currentStep, stepDates }; // Add currentStep and stepDates to the order object
+          });
+          setOrders(updatedOrders);  // Set fetched orders with currentStep and stepDates
         }
       } catch (err) {
         console.error("Error fetching orders:", err);
@@ -62,15 +96,6 @@ const OrderConfirmation = () => {
     fetchOrders();
   }, []);
 
-  // Simulate step progress
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStep((prev) => (prev < trackingSteps.length - 1 ? prev + 1 : prev));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const formatDate = (date) => {
     const parsedDate = moment(date); // Parsing ISO string
     if (!parsedDate.isValid()) {
@@ -78,7 +103,6 @@ const OrderConfirmation = () => {
     }
     return parsedDate.format('MMMM DD, YYYY'); // Format like "January 18, 2025"
   };
-  
 
   if (loading) return <div>Loading...</div>;
 
@@ -97,10 +121,7 @@ const OrderConfirmation = () => {
         </div>
       ) : (
         orders.map((order) => {
-          const { cart = [], subtotal = 0, total = 0, orderNumber, orderDate, taxes = 0 } = order;
-
-          // Log the order date to check what's being passed
-          console.log("Order Date:", orderDate);
+          const { cart = [], subtotal = 0, total = 0, orderNumber, orderDate, taxes = 0, currentStep, stepDates } = order;
 
           const formattedOrderDate = formatDate(orderDate); // Format the order date
 
@@ -110,7 +131,7 @@ const OrderConfirmation = () => {
               <p>Order Date: {formattedOrderDate}</p>
 
               <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />} >
                   <h3>Order Summary</h3>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -190,7 +211,7 @@ const OrderConfirmation = () => {
                                   }}
                                 />
                                 <span style={{ fontSize: "12px", marginTop: "4px" }}>
-                                  {step.date}
+                                  {stepDates[index] || "N/A"} {/* Display the date for the step */}
                                 </span>
                               </div>
                             )}

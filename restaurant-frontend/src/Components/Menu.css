@@ -98,4 +98,29 @@
   .back:hover {
     background-color: #0061c9;
   }
-  
+  /* Styling for the price type dropdown */
+.price-type-select {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price-type-select label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.price-type-select select {
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ff1952;
+  width: 150px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.price-type-select select:focus {
+  border-color: #4CAF50;
+}

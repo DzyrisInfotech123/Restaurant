@@ -44,7 +44,18 @@ const ItemModal = ({ item, closeModal }) => {
       addOns,
       totalPrice: calculateTotalPrice() * quantity, // Calculate total price for the item
       id: generateUniqueId(), // Generate unique ID based on item and add-ons
+      priceType: item.priceType, // Include the price type in the cart item
     };
+
+    const isCartEmpty = cart.length === 0;
+    const cartHasSaleItem = cart.some(cartItem => cartItem.priceType === 'sale');
+    const cartHasPurchaseItem = cart.some(cartItem => cartItem.priceType === 'purchase');
+
+    // Check if the price type of the selected item conflicts with existing cart items
+    if (!isCartEmpty && ((cartHasSaleItem && cartItem.priceType === 'purchase') || (cartHasPurchaseItem && cartItem.priceType === 'sale'))) {
+      alert("Cannot add item with different price type (sale/purchase) to the cart.");
+      return; // Prevent adding item to the cart
+    }
 
     // Check if the item with the same base name and add-ons is already in the cart
     const existingIndex = cart.findIndex(
@@ -93,11 +104,11 @@ const ItemModal = ({ item, closeModal }) => {
       <div className="modal-content">
         {/* Item Image */}
         <div className="item-img-container">
-        <img
-                src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`} // Use the correct path from backend
-                alt={item.name}
-                className="menu-img"
-              />
+          <img
+            src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`} // Use the correct path from backend
+            alt={item.name}
+            className="menu-img"
+          />
         </div>
 
         <h2>{item.name}</h2>

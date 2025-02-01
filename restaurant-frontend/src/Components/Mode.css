@@ -1,0 +1,70 @@
+/* Ensuring that the parent container takes full height and centers the content */
+.card-panel-wrapper {
+    display: flex;
+    justify-content: center;  /* Center horizontally */
+    align-items: center;  /* Center vertically */
+    height: 100vh; /* Full height of the viewport */
+    background-color: #f7f7f7; /* Optional: Background color for the page */
+  }
+  
+  /* Card panel styling */
+  .card-panel {
+    background: linear-gradient(135deg, #ff0051, #ffecf2); /* Gradient background for the panel */
+    padding: 70px 70px; /* Padding for spacing around the cards */
+    border-radius: 12px; /* Rounded corners for the panel */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Soft shadow effect */
+    display: flex;
+    flex-direction: column; /* Stack the cards vertically */
+    justify-content: center; /* Center the cards vertically */
+    align-items: center; /* Center the cards horizontally */
+    max-width: 600px; /* Optional: Set a max width to prevent it from becoming too wide */
+    width: 100%;
+    min-height: 300px; /* Ensure there's enough height for the panel */
+  }
+  
+  /* Card container styling */
+  .card-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Increased gap for better spacing */
+    flex-wrap: wrap; /* Allow the cards to wrap if there's not enough space */
+    align-items: center; /* Center the cards vertically */
+  }
+  
+  /* Individual card styles */
+  .card-button {
+    width: 240px;
+    height: 240px; /* Adjusted size */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff; /* Solid background for the card */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+  
+  .card-button:hover {
+    transform: translateY(-8px); /* Slight raise on hover */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .card-text {
+    font-size: 20px; /* Larger font size */
+    font-weight: 600;
+    color: #333;
+    transition: color 0.2s ease;
+  }
+  
+  .card-button:hover .card-text {
+    color: #007BFF; /* Change text color on hover */
+  }
+  
+  /* Ensure the card-container is wrapped properly */
+  .card-panel * {
+    box-sizing: border-box; /* Ensure padding and margin don't affect layout */
+  }
+  

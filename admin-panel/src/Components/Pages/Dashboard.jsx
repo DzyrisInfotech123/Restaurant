@@ -15,6 +15,7 @@ import FrozenFoodTable from '../FrozenFoodTable';
 import VendorProductPricing from '../VendorProductPricing';
 import ViewVendorPricing from '../ViewVendorPricing';
 import OrderManagement from '../OrderManagement'; // Import the OrderManagement component
+import TemplateEditor from '../TemplateEditor';
 
 const { Header, Content, Sider } = Layout;
 
@@ -72,7 +73,7 @@ const Dashboard = () => {
         <>
           <h2>Vendor Product Pricing</h2>
           <VendorProductPricing />
-          <ViewVendorPricing />
+          {/* <ViewVendorPricing /> */}
         </>
       );
     }

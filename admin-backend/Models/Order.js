@@ -16,7 +16,12 @@ const orderSchema = new mongoose.Schema({
   subtotal: { type: Number, required: true },
   taxes: { type: Number, required: true },
   total: { type: Number, required: true },
-  date: { type: Date, required: true }
+  date: { type: Date, required: true },
+  status: {
+    type: String,
+    enum: ["booked", "confirmed", "processing", "packed", "shipped", "delivered", "cancelled"],// Valid order statuses
+    default: "booked", // Default status for new orders
+  }
 });
 
 module.exports = mongoose.model("Order", orderSchema);

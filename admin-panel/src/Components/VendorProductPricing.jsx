@@ -69,7 +69,10 @@ const VendorProductPricing = () => {
         if (Array.isArray(pricingResponse.data.pricing)) {
           // Map prices to product IDs
           const pricingMap = pricingResponse.data.pricing.reduce((acc, item) => {
-            acc[item.menuItemId._id] = item.price;
+            acc[item.menuItemId._id] = {
+              purchasePrice: item.purchasePrice,
+              salePrice: item.salePrice,
+            };
             return acc;
           }, {});
           setProductPricing(pricingMap);
@@ -98,11 +101,14 @@ const VendorProductPricing = () => {
     setProductPricing({});
   };
 
-  // Handle rate change
-  const handleRateChange = (menuItemId, value) => {
+  // Handle purchase and sale price changes
+  const handlePriceChange = (menuItemId, type, value) => {
     setProductPricing((prev) => ({
       ...prev,
-      [menuItemId]: value,
+      [menuItemId]: {
+        ...prev[menuItemId],
+        [type]: value,
+      },
     }));
   };
 
@@ -117,7 +123,8 @@ const VendorProductPricing = () => {
       menuItemId,
       vendorId: selectedVendor,
       restaurantId: selectedRestaurant,
-      price: productPricing[menuItemId],
+      purchasePrice: productPricing[menuItemId].purchasePrice,
+      salePrice: productPricing[menuItemId].salePrice,
     }));
 
     try {
@@ -185,12 +192,25 @@ const VendorProductPricing = () => {
                     />
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col span={8}>
                   <Form.Item style={{ marginBottom: 0 }}>
                     <Input
-                      placeholder="Enter price"
-                      value={productPricing[food._id] || ""}
-                      onChange={(e) => handleRateChange(food._id, e.target.value)}
+                      placeholder="Enter Purchase Price"
+                      value={productPricing[food._id]?.purchasePrice || ""}
+                      onChange={(e) =>
+                        handlePriceChange(food._id, "purchasePrice", e.target.value)
+                      }
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <Input
+                      placeholder="Enter Sale Price"
+                      value={productPricing[food._id]?.salePrice || ""}
+                      onChange={(e) =>
+                        handlePriceChange(food._id, "salePrice", e.target.value)
+                      }
                     />
                   </Form.Item>
                 </Col>

@@ -36,16 +36,17 @@ router.post('/addProductPricing', async (req, res) => {
 
     // Process the pricing data
     const updatedPricingData = pricingData.map((item) => {
-      const { menuItemId, price } = item;
+      const { menuItemId, purchasePrice, salePrice } = item;
 
-      // Validate menu item ID and price
-      if (!menuItemId || price === undefined || price === null) {
-        throw new Error('Menu item ID and price are required.');
+      // Validate menu item ID, purchase price, and sale price
+      if (!menuItemId || purchasePrice === undefined || salePrice === undefined) {
+        throw new Error('Menu item ID, purchase price, and sale price are required.');
       }
 
       return {
         menuItemId: new mongoose.Types.ObjectId(menuItemId),
-        price: parseFloat(price),
+        purchasePrice: parseFloat(purchasePrice),
+        salePrice: parseFloat(salePrice),
       };
     });
 
@@ -83,6 +84,7 @@ router.post('/addProductPricing', async (req, res) => {
     });
   }
 });
+
 
 router.get('/getProductPricing', async (req, res) => {
   const { vendorId, restaurantId } = req.query;

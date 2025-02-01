@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate to programmatically navigate
 import { CartContext } from "./CartContext";
 import CartModal from "./CartModal";
+import logo from "../img/DFFOODS-removebg-preview.png";
 import "./Header.css";
 
 
@@ -42,10 +43,8 @@ const Header = () => {
   return (
     <header className="header flex justify-between items-center py-4">
       <div className="flex items-center space-x-4">
-        <span className="text-gray-600">
-          <i className="fas fa-hamburger"></i> DZYRIS
-        </span>
-      </div>
+  <img src={logo} alt="Dzyris Frozen Foods" className="logo" />
+</div>
       <div className="flex items-center space-x-4">
         {/* Profile Button with Dropdown */}
         <button className="btn login-btn" onClick={toggleDropdown}>

@@ -2,8 +2,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: linear-gradient(to right, #ff3668, #ffffff);
+  padding: 0rem 2rem;
+  background: linear-gradient(to left, #ff3668, #ffffff);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -89,4 +89,9 @@
 
 .dropdown-menu li:first-child {
   border-top: none;
+}
+
+.logo{
+  height: 75px;
+  width:80px;
 }

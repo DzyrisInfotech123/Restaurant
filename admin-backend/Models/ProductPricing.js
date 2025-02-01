@@ -6,7 +6,8 @@ const productPricingSchema = new mongoose.Schema({
   pricing: [
     {
       menuItemId: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem", required: true },
-      price: { type: Number, required: true },
+      purchasePrice: { type: Number, required: true },  // Add purchase price
+      salePrice: { type: Number, required: true },      // Add sale price
     },
   ],
 });
