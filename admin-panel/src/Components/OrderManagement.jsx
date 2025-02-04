@@ -15,16 +15,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 
-const trackingSteps = [
-  { label: "Booked", icon: "fas fa-cart-plus", date: "Jan 01, 2025" },
-  { label: "Confirmed", icon: "fas fa-check-circle", date: "Jan 02, 2025" },
-  { label: "Processing", icon: "fas fa-concierge-bell", date: "Jan 03, 2025" },
-  { label: "Packed", icon: "fas fa-box", date: "Jan 04, 2025" },
-  { label: "Shipped", icon: "fas fa-truck", date: "Jan 05, 2025" },
-  { label: "Delivered", icon: "fas fa-clipboard-check", date: "Jan 12, 2025" },
-  { label: "Cancelled", icon: "fas fa-times-circle", date: "Jan 13, 2025" }, // Added Cancelled step
-];
-
 const OrderManagement = () => {
   const location = useLocation();
   const [orders, setOrders] = useState([]);
@@ -34,6 +24,24 @@ const OrderManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Define status options
+  const statusOptions = [
+    { value: "booked", label: "Booked" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "processing", label: "Processing" },
+    { value: "packed", label: "Packed" },
+    { value: "shipped", label: "Shipped" },
+    { value: "delivered", label: "Delivered" },
+    { value: "cancelled", label: "Cancelled" },
+  ];
+
+  // Function to determine which statuses should be disabled
+  const getDisabledStatuses = (selectedStatus) => {
+    const statusOrder = statusOptions.map(option => option.value);
+    const selectedIndex = statusOrder.indexOf(selectedStatus);
+    return statusOrder.slice(0, selectedIndex);
+  };
 
   // Fetch orders
   useEffect(() => {
@@ -126,11 +134,6 @@ const OrderManagement = () => {
     return parsedDate.format('MMMM DD, YYYY'); // Format like "January 18, 2025"
   };
 
-  // Generate PDF invoice
-  const generateInvoice = (order) => {
-    // ... (existing code for generating PDF)
-  };
-
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -153,6 +156,16 @@ const OrderManagement = () => {
         filteredOrders.map((order) => {
           const { orderNumber, cart = [], currentStep = 0, subtotal = 0, total = 0, orderDate, taxes = 0, status } = order;
           const formattedOrderDate = formatDate(orderDate); // Format the order date
+
+          // Prepare tracking steps dynamically
+          const trackingSteps = [
+            { label: "Booked", icon: "fas fa-cart-plus", date: moment(orderDate).format('MMMM DD, YYYY') },
+            { label: "Confirmed", icon: "fas fa-check-circle", date: currentStep >= 1 ? "Done" : "Pending" },
+            { label: "Processing", icon: "fas fa-concierge-bell", date: currentStep >= 2 ? "Done" : "Pending" },
+            { label: "Packed", icon: "fas fa-box", date: currentStep >= 3 ? "Done" : "Pending" },
+            { label: "Shipped", icon: "fas fa-truck", date: currentStep >= 4 ? "Done" : "Pending" },
+            { label: "Delivered", icon: "fas fa-clipboard-check", date: currentStep === 5 ? moment(order.deliveryDate).format('MMMM DD, YYYY') : `Expected delivery by ${moment(orderDate).add(5, 'days').format('MMMM DD, YYYY')}` },
+          ];
 
           return (
             <div key={orderNumber} className="order-summary">
@@ -190,7 +203,7 @@ const OrderManagement = () => {
                             <div className="order-item" key={index}>
                               <div className="order-item-info">
                                 <h4>{item.name}</h4>
-                                < p className="calculation">
+                                <p className="calculation">
                                   {item.quantity} x ₹{itemPrice}{" "}
                                   {Array.isArray(item.addOns) && item.addOns.length > 0
                                     ? `+ ${item.addOns
@@ -282,14 +295,18 @@ const OrderManagement = () => {
           </Form.Item>
 
           <Form.Item label="Delivery Status" name="status">
-            <Select>
-              <Select.Option value="booked">Booked</Select.Option>
-              <Select.Option value="confirmed">Confirmed</Select.Option>
-              <Select.Option value="processing">Processing</Select.Option>
-              <Select.Option value="packed">Packed</Select.Option>
-              <Select.Option value="shipped">Shipped</Select.Option>
-              <Select.Option value="delivered">Delivered</Select.Option>
-              <Select.Option value="cancelled">Cancelled</Select.Option>
+            <Select
+              onChange={(value) => form.setFieldsValue({ status: value })} // Update form value on change
+            >
+              {statusOptions.map(option => (
+                <Select.Option 
+                  key={option.value} 
+                  value={option.value} 
+                  disabled={getDisabledStatuses(form.getFieldValue("status")).includes(option.value)}
+                >
+                  {option.label}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -302,7 +319,15 @@ const OrderManagement = () => {
                   name={["cart", index, "quantity"]}
                   initialValue={item.quantity}
                   rules={[{ required: true, message: "Quantity is required" }]}>
-                  <InputNumber min={1} />
+                  <InputNumber 
+                    min={1} 
+                    onKeyPress={(e) => {
+                      // Allow only numbers
+                      if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }} 
+                  />
                 </Form.Item>
               </div>
             ))}

@@ -237,7 +237,15 @@ const ViewMenu = () => {
             label="Price"
             rules={[{ required: true, message: 'Please enter the price' }]}
           >
-            <InputNumber min={0} />
+            <InputNumber 
+              min={0} 
+              onKeyPress={(e) => {
+                // Allow only numbers and decimal point
+                if (!/[0-9.]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }} 
+            />
           </Form.Item>
           <Form.Item
             name="description"
@@ -282,6 +290,12 @@ const ViewMenu = () => {
                     placeholder="Price"
                     min={0}
                     style={{ width: '40%', marginLeft: '10px' }}
+                    onKeyPress={(e) => {
+                      // Allow only numbers and decimal point
+                      if (!/[0-9.]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }} 
                   />
                   <Popconfirm
                     title="Are you sure you want to remove this add-on?"

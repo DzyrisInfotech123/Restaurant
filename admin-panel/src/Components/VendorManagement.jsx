@@ -185,7 +185,7 @@ const VendorManagement = ({ vendorData, onSubmit }) => {
         name="contactDetails"
         label="Contact Details"
         rules={[{ required: true, message: "Please enter contact details" }]}>
-        <Input placeholder="Enter contact details" />
+        <Input placeholder="Enter Phone Number or Email Id" />
       </Form.Item>
 
       {/* Submit Button */}

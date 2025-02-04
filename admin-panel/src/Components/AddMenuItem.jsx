@@ -7,7 +7,7 @@ const { Option } = Select;
 const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   const [form] = Form.useForm();
   const [restaurants, setRestaurants] = useState([]);
-  const [types, setTypes] = useState(["Veg", "Non-Veg", "SeekhKebab"]);
+  const [types] = useState(["Veg", "Non-Veg", "SeekhKebab"]);
   const isEditing = !!menuItemData;
 
   useEffect(() => {
@@ -65,6 +65,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   
       message.success("Menu item added successfully");
       console.log("Menu item added successfully:", response.data);
+      if (onUpdateSuccess) onUpdateSuccess(); // Call the success callback if provided
     } catch (error) {
       console.error("Error adding menu item:", error);
       message.error("Failed to add menu item.");
@@ -127,7 +128,16 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         label="Price"
         rules={[{ required: true, message: "Please enter the price" }]}
       >
-        <InputNumber min={0} placeholder="Enter price" />
+        <InputNumber 
+          min={0} 
+          placeholder="Enter price" 
+          onKeyPress={(e) => {
+            // Allow only numbers and decimal point
+            if (!/[0-9.]/.test(e.key)) {
+              e.preventDefault();
+            }
+          }} 
+        />
       </Form.Item>
 
       {/* Add-ons */}
@@ -151,7 +161,16 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
                   fieldKey={[fieldKey, "price"]}
                   rules={[{ required: true, message: "Missing add-on price" }]}
                 >
-                  <InputNumber min={0} placeholder="Price" />
+                  <InputNumber 
+                    min={0} 
+                    placeholder="Price" 
+                    onKeyPress={(e) => {
+                      // Allow only numbers and decimal point
+                      if (!/[0-9.]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }} 
+                  />
                 </Form.Item>
                 <MinusCircleOutlined onClick={() => remove(name)} />
               </Space>

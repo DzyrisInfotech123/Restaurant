@@ -53,31 +53,33 @@ const OrderConfirmation = () => {
             let currentStep = 0;
             let stepDates = [];
 
+            // Set the date for the "Booked" step to the order date
+            stepDates[0] = moment(order.orderDate).format('MMMM DD, YYYY');
+
             if (order.status === "confirmed") {
               currentStep = 1;
-              stepDates[0] = moment().format('MMMM DD, YYYY');
             } else if (order.status === "processing") {
               currentStep = 2;
-              stepDates[0] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().format('MMMM DD, YYYY');
             } else if (order.status === "packed") {
               currentStep = 3;
-              stepDates[0] = moment().subtract(2, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[2] = moment().format('MMMM DD, YYYY');
             } else if (order.status === "shipped") {
               currentStep = 4;
-              stepDates[0] = moment().subtract(3, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().subtract(2, 'days').format('MMMM DD, YYYY');
-              stepDates[2] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[3] = moment().format('MMMM DD, YYYY');
             } else if (order.status === "delivered") {
               currentStep = 5;
-              stepDates[0] = moment().subtract(4, 'days').format('MMMM DD, YYYY');
-              stepDates[1] = moment().subtract(3, 'days').format('MMMM DD, YYYY');
-              stepDates[2] = moment().subtract(2, 'days').format('MMMM DD, YYYY');
-              stepDates[3] = moment().subtract(1, 'days').format('MMMM DD, YYYY');
-              stepDates[4] = moment().format('MMMM DD, YYYY');
+              stepDates[5] = moment(order.deliveryDate).format('MMMM DD, YYYY'); // Actual delivery date
+            }
+
+            // Fill in previous steps with "Done" if they are completed
+            for (let i = 1; i <= currentStep; i++) {
+              if (i < currentStep) {
+                stepDates[i] = "Done"; // Mark as done for completed steps
+              }
+            }
+
+            // If the order is not delivered, set expected delivery date
+            if (order.status !== "delivered") {
+              const expectedDeliveryDate = moment(order.orderDate).add(5, 'days').format('MMMM DD, YYYY');
+              stepDates[5] = `Expected delivery by ${expectedDeliveryDate}`;
             }
 
             return { ...order, currentStep, stepDates };
@@ -129,8 +131,8 @@ const OrderConfirmation = () => {
 
       {error || orders.length === 0 ? (
         <div className="no-orders">
-          <h3>You have no orders</h3>
-          <p>There are no orders associated with your account at the moment.</p>
+          <h3>You have no Active Orders</h3>
+          <p>There are no active orders associated with your account at the moment.</p>
         </div>
       ) : (
         orders.map((order) => {
@@ -224,7 +226,7 @@ const OrderConfirmation = () => {
                                   }}
                                 />
                                 <span style={{ fontSize: "12px", marginTop: "4px" }}>
-                                  {stepDates[index] || "N/A"}
+                                  {stepDates[index] || "Pending"}
                                 </span>
                               </div>
                             )}

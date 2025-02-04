@@ -200,6 +200,12 @@ const VendorProductPricing = () => {
                       onChange={(e) =>
                         handlePriceChange(food._id, "purchasePrice", e.target.value)
                       }
+                      onKeyPress={(e) => {
+                        // Allow only numbers and decimal point
+                        if (!/[0-9.]/.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -211,6 +217,12 @@ const VendorProductPricing = () => {
                       onChange={(e) =>
                         handlePriceChange(food._id, "salePrice", e.target.value)
                       }
+                      onKeyPress={(e) => {
+                        // Allow only numbers and decimal point
+                        if (!/[0-9.]/.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
