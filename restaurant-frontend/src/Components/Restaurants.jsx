@@ -12,7 +12,8 @@ const Restaurants = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await axios.get("https://dev.digitalexamregistration.com/api/getRestaurant"); // Update with your backend URL
+        const vendorId = localStorage.getItem("vendorId"); // Get vendorId from local storage
+        const response = await axios.get(`https://dev.digitalexamregistration.com/api/getRestaurant?vendorId=${vendorId}`); // Fetch restaurants by vendorId
         setRestaurants(response.data); // Store fetched data
       } catch (error) {
         console.error("Error fetching restaurant data:", error);

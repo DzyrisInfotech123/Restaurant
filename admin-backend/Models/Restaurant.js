@@ -7,6 +7,7 @@ const restaurantSchema = new mongoose.Schema({
   price: { type: String, required: true },
   status: { type: String, required: true },
   imgPath: { type: String, required: true }, // Field to store the image path
+  vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true } // Associate with Vendor
 });
 
 module.exports = mongoose.model('Restaurant', restaurantSchema);

@@ -20,6 +20,12 @@ const VendorProductPricing = () => {
           "https://dev.digitalexamregistration.com/api/getVendor"
         );
         setVendors(response.data);
+        
+        // Automatically select the logged-in vendor
+        const vendorId = localStorage.getItem("vendorId");
+        if (vendorId) {
+          setSelectedVendor(vendorId);
+        }
       } catch (error) {
         message.error("Error fetching vendors.");
         console.error(error);
@@ -151,9 +157,10 @@ const VendorProductPricing = () => {
             placeholder="Select Vendor"
             onChange={handleVendorChange}
             value={selectedVendor}
+            disabled // Disable the dropdown for the logged-in vendor
           >
             {vendors.map((vendor) => (
-              <Option key={vendor._id} value={vendor._id}>
+              <Option key ={vendor._id} value={vendor._id}>
                 {vendor.vendorName}
               </Option>
             ))}

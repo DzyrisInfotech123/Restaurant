@@ -12,7 +12,8 @@ const RestaurantTable = () => {
   // Fetch restaurants from the API
   const fetchRestaurants = async () => {
     try {
-      const { data } = await axios.get('/getRestaurant'); // Destructure response data
+      const vendorId = localStorage.getItem("vendorId"); // Get vendorId from local storage
+      const { data } = await axios.get(`/getRestaurant?vendorId=${vendorId}`); // Fetch restaurants by vendorId
       setRestaurants(data);
     } catch (error) {
       console.error('Error fetching restaurants:', error);
@@ -58,8 +59,6 @@ const RestaurantTable = () => {
 
   const columns = [
     { title: 'Name', dataIndex: 'name', key: 'name' },
-    { title: 'Rating', dataIndex: 'rating', key: 'rating' },
-    { title: 'Number of Reviews', dataIndex: 'reviews', key: 'reviews' },
     { title: 'Type', dataIndex: 'type', key: 'type' },
     { title: 'Price', dataIndex: 'price', key: 'price' },
     { title: 'Status', dataIndex: 'status', key: 'status' },
@@ -74,9 +73,7 @@ const RestaurantTable = () => {
             src={imageUrl}
             alt="Restaurant"
             style={{ width: '50px', height: '50px' }}
-            
           />
-          
         );
       },
     },

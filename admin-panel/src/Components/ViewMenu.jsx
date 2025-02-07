@@ -18,7 +18,8 @@ const ViewMenu = () => {
 
   const fetchRestaurants = async () => {
     try {
-      const { data } = await axios.get('/getRestaurant');
+      const vendorId = localStorage.getItem("vendorId"); // Get vendorId from local storage
+      const { data } = await axios.get(`/getRestaurant?vendorId=${vendorId}`); // Fetch restaurants by vendorId
       setRestaurants(data);
     } catch (error) {
       console.error('Error fetching restaurants:', error);
@@ -146,7 +147,7 @@ const ViewMenu = () => {
           />
           {menuItems.length > 0 ? (
             <Table
-              dataSource={menuItems.map((item, index) => ({
+              dataSource={menuItems.map((item, index ) => ({
                 ...item,
                 key: index,
               }))}
@@ -180,7 +181,7 @@ const ViewMenu = () => {
                       >
                         <Button
                           type="danger"
-                          style={{ border: "1px solid red" , color:"red"}}
+                          style={{ border: "1px solid red", color: "red" }}
                         >
                           Delete
                         </Button>
@@ -286,7 +287,7 @@ const ViewMenu = () => {
                   />
                   <InputNumber
                     value={addOn.price}
-                    onChange={(value) => handleAddOnChange(value, 'price', index)}
+                    onChange={(value) => handleAddOnChange(value, ' price', index)}
                     placeholder="Price"
                     min={0}
                     style={{ width: '40%', marginLeft: '10px' }}

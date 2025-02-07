@@ -17,7 +17,6 @@ function Login() {
     setError(null);
 
     try {
-      // Make an API call to your login endpoint
       const response = await axios.post("https://dev.digitalexamregistration.com/api/login", {
         username,
         password,
@@ -26,24 +25,20 @@ function Login() {
       const { token, user, vendor, menuItems } = response.data;
 
       if (token) {
-        // Log the token for debugging
-        console.log("Token:", token);
-
         // Store token and user data in localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("userId", user._id);
-        localStorage.setItem("role", user.role);
+        localStorage.setItem("role", user.role); // Store user role
 
         // Store vendor info if the user is a vendor
         if (vendor) {
           localStorage.setItem("vendorId", vendor._id);
-          // Optionally, store other vendor details
         }
 
         // Store menu items if available
         localStorage.setItem("menuItems", JSON.stringify(menuItems));
 
-        // Redirect to dashboard or home page based on the role
+        // Redirect to dashboard
         navigate("/dashboard");
       } else {
         setError("Login failed: No token received");
@@ -63,9 +58,7 @@ function Login() {
         <p className="login-subheading">Please sign in to your admin account</p>
         <form className="login-form" onSubmit={handleLogin}>
           <div className="form-field">
-            <label htmlFor="username" className="form-label">
-              Username
-            </label>
+            <label htmlFor="username" className="form-label">Username</label>
             <input
               type="text"
               id="username"
@@ -77,9 +70,7 @@ function Login() {
             />
           </div>
           <div className="form-field">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
+            <label htmlFor="password" className="form-label">Password</label>
             <input
               type="password"
               id="password"

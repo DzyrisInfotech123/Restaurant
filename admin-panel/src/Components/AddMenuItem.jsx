@@ -10,12 +10,23 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   const [types] = useState(["Veg", "Non-Veg", "SeekhKebab"]);
   const isEditing = !!menuItemData;
 
+  // Retrieve vendorId from local storage
+  const vendorId = localStorage.getItem('vendorId');
+
   useEffect(() => {
+    console.log("Vendor ID in AddMenuItem:", vendorId); // Debugging statement
+
     // Fetch restaurants for dropdown
     const fetchRestaurants = async () => {
       try {
-        const { data } = await axios.get("/getRestaurant"); // Ensure this route is correct
-        setRestaurants(data);
+        const { data } = await axios.get("/getRestaurant");
+        console.log("Fetched restaurants:", data); // Log the fetched data
+
+        // Filter restaurants based on vendorId
+        const filteredRestaurants = data.filter(restaurant => restaurant.vendorId === vendorId);
+        console.log("Filtered restaurants:", filteredRestaurants); // Log the filtered data
+
+        setRestaurants(filteredRestaurants);
       } catch (error) {
         console.error("Error fetching restaurants:", error);
         message.error("Failed to fetch restaurants.");
@@ -41,7 +52,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         restaurantId: menuItemData.restaurantId,
       });
     }
-  }, [form, isEditing, menuItemData]);
+  }, [form, isEditing, menuItemData, vendorId]);
 
   const onFinish = async (values) => {
     try {

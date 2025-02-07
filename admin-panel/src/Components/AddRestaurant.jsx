@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, InputNumber, Select, Upload, Button, message } from "antd";
+import { Form, Input, Select, Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "./Services/Api";
 
@@ -30,11 +30,8 @@ const AddRestaurant = ({ restaurantData, onUpdateSuccess }) => {
   const onFinish = async (values) => {
     const { restaurantId, ...restValues } = values;
 
-    // Use the provided restaurantId (or generate if missing for new restaurants)
     const finalRestaurantId = isEditing ? restaurantData._id : restaurantId || generateRestaurantId();
-
-    const uploadedFile =
-      restValues.img && restValues.img[0]?.originFileObj ? restValues.img[0].originFileObj : null;
+    const uploadedFile = restValues.img && restValues.img[0]?.originFileObj ? restValues.img[0].originFileObj : null;
 
     try {
       const formData = new FormData();
@@ -44,8 +41,9 @@ const AddRestaurant = ({ restaurantData, onUpdateSuccess }) => {
         }
       });
 
-      // Append the restaurantId manually
+      // Append the restaurantId and vendorId
       formData.append("restaurantId", finalRestaurantId);
+      formData.append("vendorId", localStorage.getItem("vendorId")); // Get vendorId from local storage
 
       if (uploadedFile) {
         formData.append("img", uploadedFile);
@@ -73,14 +71,12 @@ const AddRestaurant = ({ restaurantData, onUpdateSuccess }) => {
     }
   };
 
-  // Function to generate a unique restaurantId if needed (only for new restaurants)
   const generateRestaurantId = () => {
     return 'restaurant-' + Math.random().toString(36).substr(2, 9);
   };
 
   return (
     <Form form={form} layout="vertical" onFinish={onFinish}>
-      {/* Restaurant ID field */}
       <Form.Item
         name="restaurantId"
         label="Restaurant ID"
@@ -100,33 +96,12 @@ const AddRestaurant = ({ restaurantData, onUpdateSuccess }) => {
         <Input placeholder="Enter restaurant name" />
       </Form.Item>
 
-      {/* <Form.Item
-        name="rating"
-        label="Rating"
-        rules={[{ required: true, message: "Please enter the restaurant rating" }]} >
-        <InputNumber min={0} max={5} placeholder="Enter rating" />
-      </Form.Item>
-
-      <Form.Item
-        name="reviews"
-        label="Reviews"
-        rules={[{ required: true, message: "Please enter the number of reviews" }]} >
-        <InputNumber min={0} placeholder="Enter number of reviews" />
-      </Form.Item> */}
-
       <Form.Item
         name="type"
         label="Type"
         rules={[{ required: true, message: "Please select the restaurant type" }]} >
         <Select placeholder="Select type">
-          <Option value="Burger">Burger</Option>
-          <Option value="Pizza">Pizza</Option>
-          <Option value="Coffee">Coffee</Option>
-          <Option value="Ice Cream">Ice Cream</Option>
-          <Option value="Fried Chicken">Fried Chicken</Option>
-          <Option value="Momos">Momos</Option>
-          <Option value="Tacos">Tacos</Option>
-          <Option value="Indian">Indian</Option>
+          <Option value="Frozen Foods">Frozen Foods</Option>
         </Select>
       </Form.Item>
 

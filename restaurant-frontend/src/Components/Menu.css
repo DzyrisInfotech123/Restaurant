@@ -30,8 +30,9 @@
   }
   
   .menu-img {
-    width: 205px; /* Set a uniform width */
-    height: 180px; /* Set a uniform height */
+    width: 190px;
+    height: 190px;
+ /* Set a uniform height */
     object-fit: cover; /* Ensure the image fits within the dimensions without distortion */
     border-radius: 8px; /* Optional: Add rounded corners for aesthetics */
     display: block; /* Ensures proper alignment */

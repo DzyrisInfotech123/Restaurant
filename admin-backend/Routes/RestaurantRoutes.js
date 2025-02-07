@@ -25,13 +25,12 @@ const upload = multer({ storage });
 router.use('/uploads', express.static(path.join(__dirname, '../../admin-backend/Routes/uploads')));
 
 // Add Restaurant route
-// Add Restaurant route
 router.post('/addRestaurant', upload.single('img'), async (req, res) => {
   console.log("Received file:", req.file); // Log file details
   console.log("Form data:", req.body); // Log the other form data
 
   try {
-    const { restaurantId, name, type, price, status } = req.body;
+    const { restaurantId, name, type, price, status, vendorId } = req.body; // Include vendorId
 
     if (!req.file) {
       return res.status(400).json({ error: "No image uploaded" });
@@ -46,6 +45,7 @@ router.post('/addRestaurant', upload.single('img'), async (req, res) => {
       price,
       status,
       imgPath, // Store image path
+      vendorId // Associate with vendor
     });
 
     await newRestaurant.save();
@@ -56,8 +56,6 @@ router.post('/addRestaurant', upload.single('img'), async (req, res) => {
   }
 });
 
-
-// Edit Restaurant route
 // Edit Restaurant route
 router.put('/editRestaurant/:id', upload.single('img'), async (req, res) => {
   console.log("Editing restaurant with ID:", req.params.id);
@@ -88,10 +86,12 @@ router.put('/editRestaurant/:id', upload.single('img'), async (req, res) => {
   }
 });
 
-// Get All Restaurants
+// Get All Restaurants by Vendor
 router.get('/getRestaurant', async (req, res) => {
+  const { vendorId } = req.query; // Get vendorId from query parameters
   try {
-    const restaurants = await Restaurant.find();
+    const query = vendorId ? { vendorId } : {}; // If vendorId is provided, filter by it
+    const restaurants = await Restaurant.find(query);
     res.json(restaurants);
   } catch (err) {
     res.status(500).json({ error: err.message });

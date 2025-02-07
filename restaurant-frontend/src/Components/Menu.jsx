@@ -47,21 +47,22 @@ const Menu = ({ restaurant, addToCart }) => {
     fetchVendors();
   }, []);
 
-  useEffect(() => {
-    const fetchMenuItems = async () => {
-      try {
-        const response = await fetch(`https://dev.digitalexamregistration.com/api/getMenuItems?restaurantId=${restaurant._id}`);
-        if (!response.ok) throw new Error("Failed to fetch menu items");
-        const data = await response.json();
-        setMenuItems(data);
-        setUpdatedMenuItems(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchMenuItems = async () => {
+    try {
+      const response = await fetch(`https://dev.digitalexamregistration.com/api/getMenuItems?restaurantId=${restaurant._id}`);
+      if (!response.ok) throw new Error("Failed to fetch menu items");
+      const data = await response.json();
+      setMenuItems(data);
+      setUpdatedMenuItems(data);
+      setError(null); // Clear any previous errors
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (restaurant) {
       fetchMenuItems();
     }
@@ -92,8 +93,10 @@ const Menu = ({ restaurant, addToCart }) => {
         });
 
         setUpdatedMenuItems(updatedItems);
+        setError(null); // Clear any previous errors
       } catch (error) {
-        setError(error.message);
+        // Instead of setting the error, just fetch the menu items again
+        await fetchMenuItems(); // Wait for the menu items to be fetched
       }
     };
 
@@ -129,9 +132,6 @@ const Menu = ({ restaurant, addToCart }) => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
-  const isLoggedIn = !!localStorage.getItem("vendorId");
 
   return (
     <section className="menu my-8">

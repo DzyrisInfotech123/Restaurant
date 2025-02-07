@@ -1,21 +1,16 @@
-// Dashboard.js
-
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
-import AddUserForm from '../AddUserForm';
+import AddUser  from '../AddUserForm';
 import UsersTable from '../UserTable';
 import AddRestaurantForm from '../AddRestaurant';
 import RestaurantTable from '../RestaurantTable';
 import MenuManagement from '../AddMenuItem';
 import ViewMenu from '../ViewMenu';
 import VendorManagement from '../VendorManagement';
-import VendorTable from '../VendorTable'; // Default import
-import FrozenFood from '../FrozenFood';
-import FrozenFoodTable from '../FrozenFoodTable';
+import VendorTable from '../VendorTable';
 import VendorProductPricing from '../VendorProductPricing';
-import ViewVendorPricing from '../ViewVendorPricing';
-import OrderManagement from '../OrderManagement'; // Import the OrderManagement component
-import TemplateEditor from '../TemplateEditor';
+import OrderManagement from '../OrderManagement';
+import VendorSelection from '../VendorSelection';
 
 const { Header, Content, Sider } = Layout;
 
@@ -25,16 +20,20 @@ const Dashboard = () => {
     return storedMenu ? storedMenu : '1';
   });
 
+  const [userRole, setUserRole] = useState(''); // Corrected line
+
   useEffect(() => {
+    const role = localStorage.getItem('role'); // Retrieve user role from local storage
+    setUserRole(role);
     localStorage.setItem('selectedMenu', selectedMenu);
   }, [selectedMenu]);
 
   const renderContent = () => {
-    if (selectedMenu === '1') {
+    if (selectedMenu === '1' && userRole === 'admin') {
       return (
         <>
           <h2>User Management</h2>
-          <AddUserForm />
+          <AddUser  />
           <UsersTable />
         </>
       );
@@ -59,12 +58,12 @@ const Dashboard = () => {
     if (selectedMenu === '4') {
       return <ViewMenu />;
     }
-    if (selectedMenu === '5') {
+    if (selectedMenu === '5' && userRole === 'admin') {
       return (
         <>
           <h2>Vendor Management</h2>
           <VendorManagement />
-          <VendorTable /> {/* Rendering VendorTable */}
+          <VendorTable />
         </>
       );
     }
@@ -73,7 +72,6 @@ const Dashboard = () => {
         <>
           <h2>Vendor Product Pricing</h2>
           <VendorProductPricing />
-          {/* <ViewVendorPricing /> */}
         </>
       );
     }
@@ -81,7 +79,15 @@ const Dashboard = () => {
       return (
         <>
           <h2>Order Management</h2>
-          <OrderManagement /> {/* Render OrderManagement component */}
+          <OrderManagement />
+        </>
+      );
+    }
+    if (selectedMenu === '9' && userRole === 'admin') {
+      return (
+        <>
+          <h2>Vendor Selection</h2>
+          <VendorSelection/>
         </>
       );
     }
@@ -97,13 +103,14 @@ const Dashboard = () => {
             selectedKeys={[selectedMenu]}
             onClick={({ key }) => setSelectedMenu(key)}
           >
-            <Menu.Item key="1">User Management</Menu.Item>
+            {userRole === 'admin' && <Menu.Item key="1">User  Management</Menu.Item>}
             <Menu.Item key="2">Restaurant Management</Menu.Item>
             <Menu.Item key="3">Add Menu</Menu.Item>
             <Menu.Item key="4">Menu Management</Menu.Item>
-            <Menu.Item key="5">Vendor Management</Menu.Item>
+           {userRole === 'admin' && <Menu.Item key="5">Vendor Management</Menu.Item>} 
             <Menu.Item key="7">Vendor Product Pricing</Menu.Item>
-            <Menu.Item key="8">Order Management</Menu.Item> {/* Add Order Management option */}
+            <Menu.Item key="8">Order Management</Menu.Item>
+            {userRole ==='admin' && <Menu.Item key="9">Vendor Selection</Menu.Item>}
           </Menu>
         </Sider>
         <Content style={{ padding: '20px' }}>{renderContent()}</Content>
