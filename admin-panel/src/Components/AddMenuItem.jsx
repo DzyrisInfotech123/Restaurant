@@ -50,6 +50,11 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
           : [],
         addOns: menuItemData.addOns || [],
         restaurantId: menuItemData.restaurantId,
+        price: menuItemData.price || 0, // Set default price to 0
+      });
+    } else {
+      form.setFieldsValue({
+        price: 0, // Set default price to 0 when adding a new item
       });
     }
   }, [form, isEditing, menuItemData, vendorId]);
@@ -142,12 +147,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         <InputNumber 
           min={0} 
           placeholder="Enter price" 
-          onKeyPress={(e) => {
-            // Allow only numbers and decimal point
-            if (!/[0-9.]/.test(e.key)) {
-              e.preventDefault();
-            }
-          }} 
+          disabled // Disable the input field
         />
       </Form.Item>
 
@@ -185,6 +185,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
                 </Form.Item>
                 <MinusCircleOutlined onClick={() => remove(name)} />
               </Space>
+              
             ))}
             <Button
               type="dashed"

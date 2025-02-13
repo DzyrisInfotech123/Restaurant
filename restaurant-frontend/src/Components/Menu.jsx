@@ -13,7 +13,7 @@ const Menu = ({ restaurant, addToCart }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updatedMenuItems, setUpdatedMenuItems] = useState([]);
-  const [priceType, setPriceType] = useState("sale"); // Added state for price type (purchase or sale)
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale"); // Retrieve priceType from localStorage
 
   const location = useLocation(); // Get location
   const { priceType: queryPriceType } = location.state || {}; // Extract priceType from state
@@ -22,6 +22,7 @@ const Menu = ({ restaurant, addToCart }) => {
   useEffect(() => {
     if (queryPriceType) {
       setPriceType(queryPriceType);
+      localStorage.setItem("priceType", queryPriceType); // Store in localStorage
     }
   }, [queryPriceType]);
 

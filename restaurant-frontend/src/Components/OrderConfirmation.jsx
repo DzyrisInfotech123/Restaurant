@@ -9,18 +9,18 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "./OrderConfirmation.css";
 import Header from "./Header";
 import moment from "moment";
 
 const OrderConfirmation = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [deliveredOrders, setDeliveredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale"); // Retrieve priceType from localStorage
 
   const trackingSteps = [
     { label: "Booked", icon: "fas fa-cart-plus" },
@@ -49,41 +49,43 @@ const OrderConfirmation = () => {
         if (response.data && response.data.length === 0) {
           setOrders([]);
         } else {
-          const updatedOrders = response.data.map((order) => {
-            let currentStep = 0;
-            let stepDates = [];
+          const updatedOrders = response.data
+            .filter(order => order.priceType === "purchase") // Filter for priceType = "purchase"
+            .map((order) => {
+              let currentStep = 0;
+              let stepDates = [];
 
-            // Set the date for the "Booked" step to the order date
-            stepDates[0] = moment(order.orderDate).format('MMMM DD, YYYY');
+              // Set the date for the "Booked" step to the order date
+              stepDates[0] = moment(order.orderDate).format('MMMM DD, YYYY');
 
-            if (order.status === "confirmed") {
-              currentStep = 1;
-            } else if (order.status === "processing") {
-              currentStep = 2;
-            } else if (order.status === "packed") {
-              currentStep = 3;
-            } else if (order.status === "shipped") {
-              currentStep = 4;
-            } else if (order.status === "delivered") {
-              currentStep = 5;
-              stepDates[5] = moment(order.deliveryDate).format('MMMM DD, YYYY'); // Actual delivery date
-            }
-
-            // Fill in previous steps with "Done" if they are completed
-            for (let i = 1; i <= currentStep; i++) {
-              if (i < currentStep) {
-                stepDates[i] = "Done"; // Mark as done for completed steps
+              if (order.status === "confirmed") {
+                currentStep = 1;
+              } else if (order.status === "processing") {
+                currentStep = 2;
+              } else if (order.status === "packed") {
+                currentStep = 3;
+              } else if (order.status === "shipped") {
+                currentStep = 4;
+              } else if (order.status === "delivered") {
+                currentStep = 5;
+                stepDates[5] = moment(order.deliveryDate).format('MMMM DD, YYYY'); // Actual delivery date
               }
-            }
 
-            // If the order is not delivered, set expected delivery date
-            if (order.status !== "delivered") {
-              const expectedDeliveryDate = moment(order.orderDate).add(5, 'days').format('MMMM DD, YYYY');
-              stepDates[5] = `Expected delivery by ${expectedDeliveryDate}`;
-            }
+              // Fill in previous steps with "Done" if they are completed
+              for (let i = 1; i <= currentStep; i++) {
+                if (i < currentStep) {
+                  stepDates[i] = "Done"; // Mark as done for completed steps
+                }
+              }
 
-            return { ...order, currentStep, stepDates };
-          });
+              // If the order is not delivered, set expected delivery date
+              if (order.status !== "delivered") {
+                const expectedDeliveryDate = moment(order.orderDate).add(5, 'days').format('MMMM DD, YYYY');
+                stepDates[5] = `Expected delivery by ${expectedDeliveryDate}`;
+              }
+
+              return { ...order, currentStep, stepDates };
+            });
 
           const activeOrders = updatedOrders.filter(order => order.status !== "delivered");
           const completedOrders = updatedOrders.filter(order => order.status === "delivered");
@@ -111,7 +113,7 @@ const OrderConfirmation = () => {
   };
 
   const handleViewCompletedOrders = () => {
-    navigate("/order-completed", { state: { deliveredOrders } });
+    window.location.href = "/order-completed"; // Use window.location.href instead of navigate
   };
 
   if (loading) return <div>Loading...</div>;
@@ -119,9 +121,9 @@ const OrderConfirmation = () => {
   return (
     <div className="order-confirmation">
       <Header />
-      <h2>Order Status</h2>
+      <h2>Purchase Order Status</h2>
       <div className="button-container">
-        <button className="back" onClick={() => (window.location.href = "/home")}>
+        <button className="back" onClick={() => window.location.href = `/home?priceType=${priceType}`}>
           Back to Restaurants
         </button>
         <button className="view-completed" onClick={handleViewCompletedOrders}>

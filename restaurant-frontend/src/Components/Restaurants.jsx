@@ -7,6 +7,7 @@ const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]); // State to hold restaurant data
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale"); // Retrieve priceType from localStorage
 
   // Fetch restaurants from the API
   useEffect(() => {
@@ -73,6 +74,7 @@ const Restaurants = () => {
       <Menu
         restaurant={selectedRestaurant}
         menuItems={selectedRestaurant.menuItems || []} // Pass menu items dynamically if available
+        priceType={priceType} // Pass priceType to Menu component
       />
     )
   ) : (

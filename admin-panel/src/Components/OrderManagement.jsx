@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { message, Button, Modal, Form, Input, Popconfirm, InputNumber, Select } from "antd"; // Import Select
+import { message, Button, Modal, Form, Input, Popconfirm, InputNumber, Select } from "antd";
 import { jsPDF } from "jspdf";
 import "./OrderManagement.css";
 import axios from "./Services/Api";
@@ -62,8 +62,17 @@ const OrderManagement = () => {
   const fetchOrders = async () => {
     try {
       const { data } = await axios.get("/getOrder");
-      setOrders(data);
-      setFilteredOrders(data);
+      
+      // Retrieve vendorId from local storage
+      const vendorId = localStorage.getItem("vendorId");
+
+      // Filter orders based on vendorId
+      const filteredOrders = data.filter(order => 
+        order.cart.some(item => item.vendorId === vendorId)
+      );
+
+      setOrders(filteredOrders);
+      setFilteredOrders(filteredOrders);
       setLoading(false);
     } catch (error) {
       setError("Failed to fetch orders.");

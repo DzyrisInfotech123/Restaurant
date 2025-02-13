@@ -1,17 +1,39 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate to programmatically navigate
+import { useNavigate } from "react-router-dom"; 
 import { CartContext } from "./CartContext";
 import CartModal from "./CartModal";
-import logo from "../img/DFFOODS-removebg-preview.png";
+import logo from "../img/DFFOODS-removebg-preview.png"; // Original logo
 import "./Header.css";
 
-
-const Header = () => {
+const Header = ({ priceType }) => { // Accept priceType as a prop
   const { cart } = useContext(CartContext);
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [vendorName, setVendorName] = useState(""); // State for vendor name
   const dropdownRef = useRef(null);
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    const fetchVendorDetails = async () => {
+      const vendorId = localStorage.getItem("vendorId"); // Retrieve vendorId from localStorage
+
+      if (vendorId) {
+        try {
+          const response = await fetch(`https://your-backend-api.com/vendors/${vendorId}`); // Replace with your actual API URL
+          if (response.ok) {
+            const data = await response.json();
+            setVendorName(data.vendorName); // Assuming API response contains { vendorName: "Ses Trading" }
+          } else {
+            console.error("Failed to fetch vendor details");
+          }
+        } catch (error) {
+          console.error("Error fetching vendor details:", error);
+        }
+      }
+    };
+
+    fetchVendorDetails();
+  }, []);
 
   const toggleCartModal = () => {
     setCartModalOpen(!isCartModalOpen);
@@ -21,7 +43,6 @@ const Header = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // Close the dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -34,38 +55,49 @@ const Header = () => {
     };
   }, []);
 
-  // Function to handle "Your Orders" click
   const handleOrdersClick = () => {
-    navigate("/order-confirmation"); // Navigate to OrderConfirmation page
-    setIsDropdownOpen(false); // Close the dropdown menu after navigation
+    navigate("/order-confirmation");
+    setIsDropdownOpen(false);
   };
+
+  const handleSaleOrdersClick = () => {
+    navigate("/SaleOrder"); // Navigate to Sale Orders page
+    setIsDropdownOpen(false);
+  };
+
   const handleLogin = () => {
-    navigate("/"); // Navigate to OrderConfirmation page
-    setIsDropdownOpen(false); // Close the dropdown menu after navigation
+    navigate("/");
+    setIsDropdownOpen(false);
   };
+
   const handleHome = () => {
-    navigate("/home"); // Navigate to OrderConfirmation page // Close the dropdown menu after navigation
+    navigate("/home");
   };
+
   return (
     <header className="header flex justify-between items-center py-4">
       <div className="flex items-center space-x-4">
-  <img src={logo} alt="Dzyris Frozen Foods" className="logo" onClick={handleHome}/>
-</div>
+        <img src={logo} alt="Dzyris Frozen Foods" className="logo" onClick={handleHome}/>
+        {/* Display "Hello, Vendor Name" if vendorName is available */}
+        {vendorName && <span className="vendor-greeting">Hello, {vendorName}!</span>}
+      </div>
       <div className="flex items-center space-x-4">
-        {/* Profile Button with Dropdown */}
         <button className="btn login-btn" onClick={toggleDropdown}>
           <i className="fas fa-user"></i>
         </button>
 
-        {/* Profile Dropdown Menu */}
         {isDropdownOpen && (
           <div ref={dropdownRef} className="dropdown-menu">
             <ul>
               <li>
                 <i className="fas fa-user-circle"></i> Profile
               </li>
+              {/* Conditionally render "Your Orders" and "Sale Orders" based on priceType */}
               <li onClick={handleOrdersClick}>
-                <i className="fas fa-box"></i> Your Orders
+                <i className="fas fa-box"></i> Purchase Orders
+              </li>
+              <li onClick={handleSaleOrdersClick}>
+                <i className="fas fa-tags"></i> Sale Orders
               </li>
               <li onClick={handleLogin}>
                 <i className="fas fa-sign-out-alt"></i> Logout
@@ -74,13 +106,11 @@ const Header = () => {
           </div>
         )}
 
-        {/* Cart Button */}
         <button className="btn" onClick={toggleCartModal}>
           <i className="fas fa-shopping-cart"></i> {cart?.length || 0}
         </button>
       </div>
 
-      {/* Cart Modal */}
       {isCartModalOpen && <CartModal closeModal={toggleCartModal} />}
     </header>
   );

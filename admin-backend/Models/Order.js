@@ -17,9 +17,10 @@ const orderSchema = new mongoose.Schema({
   taxes: { type: Number, required: true },
   total: { type: Number, required: true },
   date: { type: Date, required: true },
+  priceType: { type: String, enum: ["sale", "purchase"], required: true }, // Ensure priceType is defined here
   status: {
     type: String,
-    enum: ["booked", "confirmed", "processing", "packed", "shipped", "delivered", "cancelled"],// Valid order statuses
+    enum: ["booked", "confirmed", "processing", "packed", "shipped", "delivered", "cancelled"], // Valid order statuses
     default: "booked", // Default status for new orders
   }
 });

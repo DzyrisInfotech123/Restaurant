@@ -8,10 +8,10 @@ const router = express.Router();
 // Place an order
 router.post("/placeOrder", async (req, res) => {
   try {
-    const { cart, subtotal, taxes, total, date } = req.body;
+    const { cart, subtotal, taxes, total, date, priceType } = req.body;
 
     // Validate required fields
-    if (!cart || !subtotal || !taxes || !total || !date) {
+    if (!cart || !subtotal || !taxes || !total || !date || !priceType) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
@@ -33,6 +33,7 @@ router.post("/placeOrder", async (req, res) => {
       taxes,
       total,
       date: new Date(date),
+      priceType, // Ensure priceType is included here
     });
 
     await newOrder.save();
@@ -42,6 +43,8 @@ router.post("/placeOrder", async (req, res) => {
     res.status(500).json({ error: "Failed to place order", details: error.message });
   }
 });
+
+
 
 // Fetch orders for a specific vendor
 router.get("/getOrders", async (req, res) => {

@@ -1,11 +1,13 @@
 import React, { useContext, useState } from "react";
 import { CartContext } from "./CartContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation for accessing state
 import "./CartModal.css";
 
 const CartModal = ({ closeModal }) => {
   const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
-  const navigate = useNavigate(); // Initialize navigate function for routing
+  const navigate = useNavigate();
+  const location = useLocation(); // Get the location object
+  const priceType = location.state?.priceType || localStorage.getItem("priceType") || "sale"; // Retrieve priceType from state or localStorage
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -48,35 +50,32 @@ const CartModal = ({ closeModal }) => {
   };
 
   const handleConfirmOrder = async () => {
-    // Retrieve the vendorId from localStorage
     const vendorId = localStorage.getItem("vendorId");
-  
-    // Log the vendorId to the console for debugging
-    console.log("Vendor ID retrieved from localStorage:", vendorId);
-  
     if (!vendorId) {
       console.error("Vendor ID is missing.");
-      return; // You may want to show an error message to the user
+      return;
     }
-  
-    // Ensure that each cart item contains the vendorId and imgPath
+
     const updatedCart = cart.map(item => ({
       ...item,
-      vendorId: item.vendorId || vendorId, // Set vendorId if it's missing from the item
-      imgPath: item.imgPath || "", // Ensure imgPath is present
+      vendorId: item.vendorId || vendorId,
+      imgPath: item.imgPath || "",
     }));
-  
-    const orderNumber = generateOrderNumber(); // Generate a 6-digit order number
+
+    const orderNumber = generateOrderNumber();
     const orderDetails = {
       orderNumber,
-      cart: updatedCart, // Use the updated cart
-      vendorId, // Include the vendor ID
+      cart: updatedCart,
+      vendorId,
       subtotal,
       taxes,
       total,
-      date: new Date().toISOString(), // Add a timestamp for when the order was placed
+      priceType, // Include priceType in the order details
+      date: new Date().toISOString(),
     };
-  
+
+    console.log("Order Details:", orderDetails); // Log order details for debugging
+
     try {
       const response = await fetch("https://dev.digitalexamregistration.com/api/placeOrder", {
         method: "POST",
@@ -85,29 +84,26 @@ const CartModal = ({ closeModal }) => {
         },
         body: JSON.stringify(orderDetails),
       });
-  
+
       const responseData = await response.json();
-  
+
       if (response.ok) {
         console.log("Order placed successfully!", responseData);
       } else {
         console.error("Failed to place order:", responseData.error || responseData);
       }
-  
-      // Clear cart and navigate to confirmation page
+
       clearCart();
       navigate("/order-confirmation", {
         state: { orderNumber, cart, total, taxes, subtotal },
       });
-  
-      closeModal(); // Close the Cart Modal
+
+      closeModal();
       setShowConfirmModal(false);
     } catch (error) {
       console.error("Error placing order:", error);
     }
   };
-  
-  
 
   const handleCancelOrder = () => {
     setShowConfirmModal(false);
@@ -128,8 +124,7 @@ const CartModal = ({ closeModal }) => {
             <div className="cart-items">
               {cart.map((item, index) => (
                 <div className="cart-item" key={index}>
-                  <img
-                    src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
+                  <img src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
                     alt={item.name}
                     className="item-image"
                     onError={(e) => {

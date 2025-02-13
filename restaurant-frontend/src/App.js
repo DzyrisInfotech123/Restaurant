@@ -5,6 +5,7 @@ import Home from "./Components/Home"; // Your home page component
 import OrderConfirmation from "./Components/OrderConfirmation";
 import OrderCompleted from "./Components/OrderCompleted";
 import Mode from "./Components/Mode";
+import SaleOrder from "./Components/SaleOrder";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="mode" element={<Mode/>}></Route>
         <Route path="/order-completed" element={<OrderCompleted/>} />
+        <Route path="/SaleOrder" element={<SaleOrder/>} />
       </Routes>
   );
 };

@@ -9,10 +9,8 @@ export default function CardButtons() {
 
   const handleCardClick = (priceType) => {
     changePriceType(priceType); // Update price type globally
-    navigate("/home", { state: { priceType } });
-    setTimeout(() => {
-      window.location.reload(); // Refresh the page after navigation
-    }, 50);
+    localStorage.setItem("priceType", priceType); // Store priceType in localStorage
+    navigate("/home", { state: { priceType } }); // Pass priceType in state
   };
 
   return (
