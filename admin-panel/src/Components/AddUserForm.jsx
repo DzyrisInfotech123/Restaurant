@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Select, Button, message } from "antd";
 import axios from "./Services/Api"; // Ensure Axios is set up properly
 
-const AddUserForm = ({ loggedInUser }) => {
+const AddUserForm = ({ loggedInUser  }) => {
   const [form] = Form.useForm();
   const [vendors, setVendors] = useState([]); // To hold the list of vendors
   const [role, setRole] = useState(""); // Track selected role
@@ -43,14 +43,14 @@ const AddUserForm = ({ loggedInUser }) => {
       return;
     }
 
-    if (role === "vendor" && !values.vendorId) {
-      message.error("Vendor ID is required for the vendor role.");
+    if ((role === "vendor" || role === "employee") && !values.vendorId) {
+      message.error("Vendor ID is required for the vendor and employee roles.");
       return;
     }
 
     try {
       const response = await axios.post(
-        "https://dev.digitalexamregistration.com/api/addUser",
+        "https://dev.digitalexamregistration.com/api/addUser ",
         values,
         {
           headers: {
@@ -60,7 +60,7 @@ const AddUserForm = ({ loggedInUser }) => {
       );
 
       if (response.status === 201) {
-        message.success("User added successfully!");
+        message.success("User  added successfully!");
         form.resetFields();
       } else {
         message.error("Unexpected response from the server.");
@@ -89,10 +89,11 @@ const AddUserForm = ({ loggedInUser }) => {
         <Select placeholder="Select role" onChange={handleRoleChange}>
           <Select.Option value="admin">Admin</Select.Option>
           <Select.Option value="vendor">Vendor</Select.Option>
+          <Select.Option value="employee">Employee</Select.Option>
         </Select>
       </Form.Item>
 
-      {role === "vendor" && (
+      {(role === "vendor" || role === "employee") && ( // Use OR operator to show vendor dropdown
         <Form.Item name="vendorId" label="Vendor" rules={[{ required: true }]}>
           <Select placeholder="Select vendor">
             {vendors.map((vendor) => (

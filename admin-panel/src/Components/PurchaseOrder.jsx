@@ -15,7 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 
-const OrderManagement = () => {
+const PurchaseOrder = () => {
   const location = useLocation();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -52,7 +52,7 @@ const OrderManagement = () => {
     const filtered = orders.filter(
       (order) =>
         order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        order.priceType === "sale"
+        order.priceType === "purchase"
     );
     setFilteredOrders(filtered);
   }, [searchQuery, orders]);
@@ -66,7 +66,7 @@ const OrderManagement = () => {
 
       // Filter orders based on vendorId and priceType
       const filteredOrders = data.filter(order => 
-        order.cart.some(item => item.vendorId === vendorId) && order.priceType === "sale"
+        order.cart.some(item => item.vendorId === vendorId) && order.priceType === "purchase"
       );
 
       setOrders(filteredOrders);
@@ -299,4 +299,4 @@ const OrderManagement = () => {
   );
 };
 
-export default OrderManagement;
+export default PurchaseOrder;

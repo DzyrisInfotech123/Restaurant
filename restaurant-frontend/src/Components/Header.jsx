@@ -10,6 +10,7 @@ const Header = ({ priceType }) => { // Accept priceType as a prop
   const [isCartModalOpen, setCartModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [vendorName, setVendorName] = useState(""); // State for vendor name
+  const [userRole, setUserRole] = useState(""); // State for user role
   const dropdownRef = useRef(null);
   const navigate = useNavigate(); 
 
@@ -33,6 +34,12 @@ const Header = ({ priceType }) => { // Accept priceType as a prop
     };
 
     fetchVendorDetails();
+  }, []);
+
+  useEffect(() => {
+    // Retrieve user role from localStorage
+    const role = localStorage.getItem("role");
+    setUserRole(role); // Set the user role state
   }, []);
 
   const toggleCartModal = () => {
@@ -92,10 +99,12 @@ const Header = ({ priceType }) => { // Accept priceType as a prop
               <li>
                 <i className="fas fa-user-circle"></i> Profile
               </li>
-              {/* Conditionally render "Your Orders" and "Sale Orders" based on priceType */}
-              <li onClick={handleOrdersClick}>
-                <i className="fas fa-box"></i> Purchase Orders
-              </li>
+              {/* Conditionally render "Purchase Orders" based on user role */}
+              {userRole !== 'employee' && ( // Hide "Purchase Orders" if user is an employee
+                <li onClick={handleOrdersClick}>
+                  <i className="fas fa-box"></i> Purchase Orders
+                </li>
+              )}
               <li onClick={handleSaleOrdersClick}>
                 <i className="fas fa-tags"></i> Sale Orders
               </li>

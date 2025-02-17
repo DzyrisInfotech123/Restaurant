@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['SuperAdmin', 'admin', 'user', 'vendor'], // Add 'vendor' as an allowed role
+    enum: ['SuperAdmin', 'admin', 'user', 'vendor','employee'], // Add 'vendor' as an allowed role
     required: true,
   },
   vendorId: {

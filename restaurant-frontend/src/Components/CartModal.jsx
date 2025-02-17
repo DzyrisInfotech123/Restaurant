@@ -94,7 +94,7 @@ const CartModal = ({ closeModal }) => {
       }
 
       clearCart();
-      navigate("/order-confirmation", {
+      navigate("/SaleOrder", {
         state: { orderNumber, cart, total, taxes, subtotal },
       });
 
