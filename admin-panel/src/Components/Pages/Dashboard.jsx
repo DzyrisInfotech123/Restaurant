@@ -12,6 +12,8 @@ import VendorProductPricing from '../VendorProductPricing';
 import OrderManagement from '../OrderManagement';
 import VendorSelection from '../VendorSelection';
 import PurchaseOrder from '../PurchaseOrder';
+import InventoryManagement from '../InventoryManagement';
+import ReportPage from '../ReportPage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -101,10 +103,19 @@ const Dashboard = () => {
         </>
       );
     }
-    if (selectedMenu === '11' && userRole === 'admin') {
+    if (selectedMenu === '11') {
       return (
         <>
           <h2>Inventory Management</h2>
+          <InventoryManagement/>
+        </>
+      );
+    }
+    if (selectedMenu === '12') {
+      return (
+        <>
+          <h2>Report</h2>
+          <ReportPage/>
         </>
       );
     }
@@ -130,6 +141,7 @@ const Dashboard = () => {
             {userRole ==='admin' && <Menu.Item key="9">Vendor Selection</Menu.Item>}
             {userRole ==='admin' && <Menu.Item key="10">Purchase Order Management</Menu.Item>}
             <Menu.Item key="11">Inventory Management</Menu.Item>
+            <Menu.Item key="12">Report</Menu.Item>
           </Menu>
         </Sider>
         <Content style={{ padding: '20px' }}>{renderContent()}</Content>

@@ -22,7 +22,8 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ["booked", "confirmed", "processing", "packed", "shipped", "delivered", "cancelled"], // Valid order statuses
     default: "booked", // Default status for new orders
-  }
+  },
+  processed: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model("Order", orderSchema);

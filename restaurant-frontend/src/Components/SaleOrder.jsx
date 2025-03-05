@@ -31,7 +31,7 @@ const SaleOrder = () => {
 
       try {
         const response = await axios.get(
-          `https://dev.digitalexamregistration.com/api/getOrders?vendorId=${vendorId}`
+          `https://dev.digitalexamregistration.com/api/getOrder?vendorId=${vendorId}`
         );
         if (response.data && response.data.length === 0) {
           setOrders([]);

@@ -124,4 +124,16 @@ router.delete('/deleteMenuItem/:id', async (req, res) => {
   }
 });
 
+// Get All Menu Items for a Vendor
+// Get All Menu Items for a Vendor
+router.get('/getAllMenuItems', async (req, res) => {
+  try {
+    const vendorId = req.query.vendorId; // Get vendorId from query
+    const menuItems = await MenuItem.find({ vendorId }); // Adjust your schema if necessary res.json(menuItems);
+  } catch (error) {
+    console.error('Error fetching all menu items:', error);
+    res.status(500).json({ message: 'Failed to fetch menu items.' });
+  }
+});
+
 module.exports = router;

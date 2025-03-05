@@ -12,6 +12,7 @@ const menuRoutes = require('./menuRoutes');
 const vendorRoutes = require('./VendorRoutes');
 const productPricing = require('./ProductPricingRoutes');
 const orderRoutes = require('./orderRoutes');
+const inventoryRoutes = require('./InventoryRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 4100;
@@ -52,6 +53,7 @@ app.use('/api', menuRoutes);
 app.use('/api', vendorRoutes);
 app.use('/api', productPricing);
 app.use('/api', orderRoutes);
+app.use('/api', inventoryRoutes);
 
 // Default route
 app.get('/', (req, res) => {

@@ -15,7 +15,6 @@ router.post("/placeOrder", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    // Validate cart items
     for (const item of cart) {
       if (!item.vendorId || !item.imgPath) {
         return res.status(400).json({ error: "Cart items must include vendorId and imgPath." });
@@ -25,7 +24,7 @@ router.post("/placeOrder", async (req, res) => {
     // Generate a unique order number
     const orderNumber = crypto.randomBytes(6).toString("hex").toUpperCase();
 
-    // Create a new order document
+    // ✅ Create the new order with processed: false
     const newOrder = new Order({
       orderNumber,
       cart,
@@ -33,9 +32,9 @@ router.post("/placeOrder", async (req, res) => {
       taxes,
       total,
       date: new Date(date),
-      priceType, // Ensure priceType is included here
+      priceType,
+      processed: false, // Ensure this is always false initially
     });
-
     await newOrder.save();
     res.status(201).json({ message: "Order placed successfully!", order: newOrder });
   } catch (error) {
@@ -48,28 +47,29 @@ router.post("/placeOrder", async (req, res) => {
 
 // Fetch orders for a specific vendor
 router.get("/getOrders", async (req, res) => {
-  const { vendorId } = req.query;
+  const { vendorId, processed } = req.query;
 
   if (!vendorId) {
     return res.status(400).json({ error: "Vendor ID is required." });
   }
 
+  // Ensure processed is correctly converted to Boolean
+  let isProcessed = processed === "true" ? true : false;
+
   try {
-    const orders = await Order.find({ "cart.vendorId": vendorId });
+    console.log(`Fetching orders for vendor: ${vendorId}, Processed: ${isProcessed}`);
+
+    // Fetch orders where processed matches the query parameter
+    const orders = await Order.find({ "cart.vendorId": vendorId, processed: isProcessed });
 
     if (!orders.length) {
       return res.status(404).json({ error: "No orders found for this vendor." });
     }
 
-    // Add the formatted orderDate without changing the existing structure
-    const enrichedOrders = orders.map(order => {
-      const formattedOrderDate = order.date ? order.date.toISOString() : null;
-
-      return {
-        ...order.toObject(),  // Convert mongoose document to plain object
-        orderDate: formattedOrderDate  // Add formatted orderDate
-      };
-    });
+    const enrichedOrders = orders.map((order) => ({
+      ...order.toObject(),
+      orderDate: order.date ? order.date.toISOString() : null,
+    }));
 
     res.status(200).json(enrichedOrders);
   } catch (error) {
@@ -77,6 +77,24 @@ router.get("/getOrders", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch orders", details: error.message });
   }
 });
+router.post("/markOrderProcessed", async (req, res) => {
+  const { orderId } = req.body;
+
+  if (!orderId) {
+    return res.status(400).json({ error: "Order ID is required." });
+  }
+
+  try {
+    await Order.findByIdAndUpdate(orderId, { processed: true });
+    res.status(200).json({ message: "Order marked as processed." });
+  } catch (error) {
+    console.error("Error marking order as processed:", error);
+    res.status(500).json({ error: "Failed to mark order as processed." });
+  }
+}); 
+
+
+
 
 
 // Fetch all orders with vendor names
