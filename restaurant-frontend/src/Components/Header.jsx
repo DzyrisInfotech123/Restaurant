@@ -99,12 +99,6 @@ const Header = ({ priceType }) => { // Accept priceType as a prop
               <li>
                 <i className="fas fa-user-circle"></i> Profile
               </li>
-              {/* Conditionally render "Purchase Orders" based on user role */}
-              {userRole !== 'employee' && ( // Hide "Purchase Orders" if user is an employee
-                <li onClick={handleOrdersClick}>
-                  <i className="fas fa-box"></i> Purchase Orders
-                </li>
-              )}
               <li onClick={handleSaleOrdersClick}>
                 <i className="fas fa-tags"></i> Sale Orders
               </li>

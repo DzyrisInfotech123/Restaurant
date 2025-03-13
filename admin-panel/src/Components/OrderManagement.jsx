@@ -36,7 +36,6 @@ const OrderManagement = () => {
     { value: "cancelled", label: "Cancelled" },
   ];
 
-  // Function to determine which statuses should be disabled
   const getDisabledStatuses = (selectedStatus) => {
     const statusOrder = statusOptions.map(option => option.value);
     const selectedIndex = statusOrder.indexOf(selectedStatus);
@@ -59,20 +58,21 @@ const OrderManagement = () => {
 
   const fetchOrders = async () => {
     try {
-      const { data } = await axios.get("/getOrder");
-      
-      // Retrieve vendorId from local storage
       const vendorId = localStorage.getItem("vendorId");
 
-      // Filter orders based on vendorId and priceType
-      const filteredOrders = data.filter(order => 
-        order.cart.some(item => item.vendorId === vendorId) && order.priceType === "sale"
-      );
+      if (!vendorId) {
+        setError("Vendor ID is missing.");
+        setLoading(false);
+        return;
+      }
 
-      setOrders(filteredOrders);
-      setFilteredOrders(filteredOrders);
+      const { data } = await axios.get(`/getOrder?vendorId=${vendorId}`);
+
+      setOrders(data);
+      setFilteredOrders(data);
       setLoading(false);
     } catch (error) {
+      console.error("Error fetching orders:", error);
       setError("Failed to fetch orders.");
       setLoading(false);
     }
@@ -83,7 +83,7 @@ const OrderManagement = () => {
     form.setFieldsValue({
       orderNumber: order.orderNumber,
       cart: order.cart || [],
-      status: order.status || "booked", // Set the current status
+      status: order.status || "booked",
     });
   };
 
@@ -107,18 +107,18 @@ const OrderManagement = () => {
         const existingItem = existingOrder.cart[index];
         return {
           ...existingItem,
-          quantity: item.quantity, // Update only the quantity
-          totalPrice: existingItem.price * item.quantity, // Recalculate totalPrice
+          quantity: item.quantity,
+          totalPrice: existingItem.price * item.quantity,
         };
       });
 
       const payload = {
         cart: updatedCart,
         subtotal: updatedCart.reduce((acc, item) => acc + item.totalPrice, 0),
-        taxes: updatedCart.reduce((acc, item) => acc + item.totalPrice, 0) * 0.12, // Assuming a tax rate of 12%
-        total: updatedCart.reduce((acc, item) => acc + item.totalPrice, 0) * 1.12, // Total including taxes
+        taxes: updatedCart.reduce((acc, item) => acc + item.totalPrice, 0) * 0.12,
+        total: updatedCart.reduce((acc, item) => acc + item.totalPrice, 0) * 1.12,
         date: new Date().toISOString(),
-        status: values.status, // Include the status in the payload
+        status: values.status,
       };
 
       const response = await axios.put(`/updateOrder/${values.orderNumber}`, payload);
@@ -134,11 +134,8 @@ const OrderManagement = () => {
   };
 
   const formatDate = (date) => {
-    const parsedDate = moment(date); // Parsing ISO string
-    if (!parsedDate.isValid()) {
-      return "Invalid Date";
-    }
-    return parsedDate.format('MMMM DD, YYYY'); // Format like "January 18, 2025"
+    const parsedDate = moment(date);
+    return parsedDate.isValid() ? parsedDate.format('MMMM DD, YYYY') : "Invalid Date";
   };
 
   if (loading) return <div>Loading...</div>;
@@ -162,19 +159,11 @@ const OrderManagement = () => {
       ) : (
         filteredOrders.map((order) => {
           const { orderNumber, cart = [], subtotal = 0, total = 0, date, taxes = 0, status } = order;
-          const formattedOrderDate = formatDate(date); // Format the order date
-
           return (
             <div key={orderNumber} className="order-summary">
-              <h3>
-                Order Number: {orderNumber}
-              </h3>
-              <p>Order Date: {formattedOrderDate}</p>
-
-              {/* Delivery Status Display */}
-              <p>
-                Delivery Status: <strong>{status}</strong>
-              </p>
+              <h3>Order Number: {orderNumber}</h3>
+              <p>Order Date: {formatDate(date)}</p>
+              <p>Delivery Status: <strong>{status}</strong></p>
 
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -182,41 +171,12 @@ const OrderManagement = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <div className="order-details">
-                    <div className="order-items">
-                      {cart.length > 0 ? (
-                        cart.map((item, index) => {
-                          const addOnTotal = Array.isArray(item.addOns)
-                            ? item.addOns.reduce(
-                                (sum, addOn) => sum + parseFloat(addOn.price || 0),
-                                0
-                              )
-                            : 0;
-                          const itemPrice = parseFloat(item.price || 0);
-                          const itemTotal =
-                            (itemPrice + addOnTotal) * (item.quantity || 1);
-
-                          return (
-                            <div className="order-item" key={index}>
-                              <div className="order-item-info">
-                                <h4>{item.name}</h4>
-                                <p className="calculation">
-                                  {item.quantity} x ₹{itemPrice}{" "}
-                                  {Array.isArray(item.addOns) && item.addOns.length > 0
-                                    ? `+ ${item.addOns
-                                        .map((addOn) => `${addOn.name} (₹${addOn.price})`)
-                                        .join(" + ")}` 
-                                    : ""}{" "}
-                                  = ₹{itemTotal.toFixed(2)}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <p>No items found in this order.</p>
-                      )}
-                    </div>
-
+                    {cart.map((item, index) => (
+                      <div className="order-item" key={index}>
+                        <h4>{item.name}</h4>
+                        <p>{item.quantity} x ₹{item.price} = ₹{(item.price * item.quantity).toFixed(2)}</p>
+                      </div>
+                    ))}
                     <div className="order-summary-right">
                       <p>Subtotal: ₹{subtotal.toFixed(2)}</p>
                       <p>Taxes: ₹{taxes.toFixed(2)}</p>
@@ -228,12 +188,7 @@ const OrderManagement = () => {
 
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
                 <Button onClick={() => handleEdit(order)}>Edit Order</Button>
-                <Popconfirm
-                  title="Are you sure you want to delete this order?"
-                  onConfirm={() => handleDeleteOrder(order._id)}
-                  okText="Yes"
-                  cancelText="No"
-                >
+                <Popconfirm title="Delete this order?" onConfirm={() => handleDeleteOrder(order._id)} okText="Yes" cancelText="No">
                   <Button danger>Delete</Button>
                 </Popconfirm>
               </div>
@@ -242,56 +197,16 @@ const OrderManagement = () => {
         })
       )}
 
-      <Modal
-        open={editingOrder !== null}
-        title={`Edit Quantity - ${editingOrder?.orderNumber}`}
-        onCancel={() => { setEditingOrder(null); form.resetFields(); }}
-        footer={null}
-      >
+      <Modal open={editingOrder !== null} onCancel={() => { setEditingOrder(null); form.resetFields(); }} footer={null}>
         <Form form={form} onFinish={handleSave}>
           <Form.Item label="Order Number" name="orderNumber">
             <Input disabled />
           </Form.Item>
-
           <Form.Item label="Delivery Status" name="status">
-            <Select
-              onChange={(value) => form.setFieldsValue({ status: value })} // Update form value on change
-            >
-              {statusOptions.map(option => (
-                <Select.Option 
-                  key={option.value} 
-                  value={option.value} 
-                  disabled={getDisabledStatuses(form.getFieldValue("status")).includes(option.value)}
-                >
-                  {option.label}
-                </Select.Option>
-              ))}
+            <Select>
+              {statusOptions.map(option => <Select.Option key={option.value} value={option.value}>{option.label}</Select.Option>)}
             </Select>
           </Form.Item>
-
-          <div>
-            <h4>Cart Items</h4>
-            {form.getFieldValue("cart")?.map((item, index) => (
-              <div key={index} style={{ marginBottom: "10px" }}>
-                <Form.Item
-                  label={`${item.name} in kg`}
-                  name={["cart", index, "quantity"]}
-                  initialValue={item.quantity}
-                  rules={[{ required: true, message: "Quantity is required" }]}>
-                  <InputNumber 
-                    min={1} 
-                    onKeyPress={(e) => {
-                      // Allow only numbers
-                      if (!/[0-9]/.test(e.key)) {
-                        e.preventDefault();
-                      }
-                    }} 
-                  />
-                </Form.Item>
-              </div>
-            ))}
-          </div>
-
           <Button type="primary" htmlType="submit">Save Changes</Button>
         </Form>
       </Modal>

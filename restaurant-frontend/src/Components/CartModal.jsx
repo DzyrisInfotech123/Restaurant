@@ -1,13 +1,13 @@
 import React, { useContext, useState } from "react";
 import { CartContext } from "./CartContext";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation for accessing state
+import { useNavigate, useLocation } from "react-router-dom";
 import "./CartModal.css";
 
 const CartModal = ({ closeModal }) => {
   const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
-  const location = useLocation(); // Get the location object
-  const priceType = location.state?.priceType || localStorage.getItem("priceType") || "sale"; // Retrieve priceType from state or localStorage
+  const location = useLocation();
+  const priceType = location.state?.priceType || localStorage.getItem("priceType") || "sale";
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -23,9 +23,9 @@ const CartModal = ({ closeModal }) => {
   };
 
   const subtotal = calculateSubtotal();
-  const taxPercentage = 0.12; // 12% Tax
-  const taxes = subtotal * taxPercentage; // Calculate taxes as 12% of the subtotal
-  const total = subtotal + taxes; // Total now includes taxes
+  const taxPercentage = 0.12;
+  const taxes = subtotal * taxPercentage;
+  const total = subtotal + taxes;
 
   const handleQuantityChange = (item, operation) => {
     const updatedItem = { ...item };
@@ -46,7 +46,7 @@ const CartModal = ({ closeModal }) => {
   };
 
   const generateOrderNumber = () => {
-    return Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit number
+    return Math.floor(100000 + Math.random() * 900000);
   };
 
   const handleConfirmOrder = async () => {
@@ -56,11 +56,20 @@ const CartModal = ({ closeModal }) => {
       return;
     }
 
-    const updatedCart = cart.map(item => ({
-      ...item,
-      vendorId: item.vendorId || vendorId,
-      imgPath: item.imgPath || "",
-    }));
+    const updatedCart = cart.map((item) => {
+      const itemPrice = parseFloat(item.price || 0);
+      const addOnTotal = Array.isArray(item.addOns)
+        ? item.addOns.reduce((sum, addOn) => sum + parseFloat(addOn.price || 0), 0)
+        : 0;
+      const totalPrice = (itemPrice + addOnTotal) * (item.quantity || 1);
+
+      return {
+        ...item,
+        vendorId: item.vendorId || vendorId,
+        imgPath: item.imgPath || "",
+        totalPrice,
+      };
+    });
 
     const orderNumber = generateOrderNumber();
     const orderDetails = {
@@ -70,11 +79,11 @@ const CartModal = ({ closeModal }) => {
       subtotal,
       taxes,
       total,
-      priceType, // Include priceType in the order details
+      priceType,
       date: new Date().toISOString(),
     };
 
-    console.log("Order Details:", orderDetails); // Log order details for debugging
+    console.log("Order Details:", orderDetails);
 
     try {
       const response = await fetch("https://dev.digitalexamregistration.com/api/placeOrder", {
@@ -124,7 +133,8 @@ const CartModal = ({ closeModal }) => {
             <div className="cart-items">
               {cart.map((item, index) => (
                 <div className="cart-item" key={index}>
-                  <img src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
+                  <img
+                    src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
                     alt={item.name}
                     className="item-image"
                     onError={(e) => {
@@ -148,24 +158,15 @@ const CartModal = ({ closeModal }) => {
                     )}
                   </div>
                   <div className="item-quantity">
-                    <button
-                      className="quantity-btn"
-                      onClick={() => handleQuantityChange(item, "decrement")}
-                    >
+                    <button className="quantity-btn" onClick={() => handleQuantityChange(item, "decrement")}>
                       -
                     </button>
                     <span>{item.quantity}</span>
-                    <button
-                      className="quantity-btn"
-                      onClick={() => handleQuantityChange(item, "increment")}
-                    >
+                    <button className="quantity-btn" onClick={() => handleQuantityChange(item, "increment")}>
                       +
                     </button>
                   </div>
-                  <button
-                    className="remove-item-btn"
-                    onClick={() => handleRemoveItem(item.id)}
-                  >
+                  <button className="remove-item-btn" onClick={() => handleRemoveItem(item.id)}>
                     Remove
                   </button>
                 </div>
@@ -176,30 +177,6 @@ const CartModal = ({ closeModal }) => {
               <h3>Total Bill</h3>
             </div>
             <div className="cart-summary">
-              <div className="item-breakdown">
-                {cart.map((item, index) => {
-                  const addOnTotal = Array.isArray(item.addOns)
-                    ? item.addOns.reduce((sum, addOn) => sum + parseFloat(addOn.price || 0), 0)
-                    : 0;
-                  const itemPrice = parseFloat(item.price || 0);
-                  const itemTotal = (itemPrice + addOnTotal) * (item.quantity || 1);
-
-                  return (
-                    <div className="breakdown-item" key={index}>
-                      <p>
-                        {item.name} {item.quantity} x ₹{itemPrice}{" "}
-                        {Array.isArray(item.addOns) &&
-                          item.addOns.length > 0 &&
-                          `+ ${item.addOns
-                            .map((addOn) => `${addOn.name} (₹${addOn.price})`)
-                            .join(" + ")}`}{" "}
-                        = ₹{itemTotal.toFixed(2)}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
               <p>Subtotal : ₹{subtotal.toFixed(2)}</p>
               <p>GST : ₹{taxes.toFixed(2)}</p>
               <h3>Total: ₹{total.toFixed(2)}</h3>
@@ -215,11 +192,11 @@ const CartModal = ({ closeModal }) => {
       </div>
 
       {showConfirmModal && (
-        <div className="confirmation-overlay">
-          <div className="confirmation-modal">
+        <div className="confirm-modal-overlay">
+          <div className="confirm-modal">
             <h3>Confirm Order</h3>
             <p>Are you sure you want to place this order?</p>
-            <div className="confirmation-buttons">
+            <div className="confirm-buttons">
               <button className="confirm-btn" onClick={handleConfirmOrder}>
                 Yes, Place Order
               </button>

@@ -147,7 +147,6 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         <InputNumber 
           min={0} 
           placeholder="Enter price" 
-          disabled // Disable the input field
         />
       </Form.Item>
 

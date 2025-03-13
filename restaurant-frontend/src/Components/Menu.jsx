@@ -1,30 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // Import useLocation hook
-import ItemModal from "./ItemModal"; // Import the ItemModal
+import React, { useState, useEffect, useContext } from "react";
+import { useLocation } from "react-router-dom";
 import "./Menu.css";
+import { CartContext } from "./CartContext";
+import vegLogo from "../img/veg.png"; // Import Veg Logo
+import nonVegLogo from "../img/nonveg.png"; // Import Non-Veg Logo
 
-const Menu = ({ restaurant, addToCart }) => {
+const Menu = ({ restaurant }) => {
+  const { cart, addToCart, removeFromCart } = useContext(CartContext);
   const [menuItems, setMenuItems] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [selectedVendor, setSelectedVendor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("All");
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [updatedMenuItems, setUpdatedMenuItems] = useState([]);
-  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale"); // Retrieve priceType from localStorage
+  const [filter, setFilter] = useState("All");
 
-  const location = useLocation(); // Get location
-  const { priceType: queryPriceType } = location.state || {}; // Extract priceType from state
-
-  // If the priceType is passed in state, update the priceType
   useEffect(() => {
-    if (queryPriceType) {
-      setPriceType(queryPriceType);
-      localStorage.setItem("priceType", queryPriceType); // Store in localStorage
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch(
+          `https://dev.digitalexamregistration.com/api/getMenuItems?restaurantId=${restaurant._id}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch menu items");
+        const data = await response.json();
+        setMenuItems(data);
+        setUpdatedMenuItems(data);
+        setError(null);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (restaurant) {
+      fetchMenuItems();
     }
-  }, [queryPriceType]);
+  }, [restaurant]);
 
   const menuTypes = ["All", ...new Set(menuItems.map((item) => item.type))];
 
@@ -33,103 +43,20 @@ const Menu = ({ restaurant, addToCart }) => {
     return item.type === filter;
   });
 
-  useEffect(() => {
-    const fetchVendors = async () => {
-      try {
-        const response = await fetch("https://dev.digitalexamregistration.com/api/getVendor");
-        if (!response.ok) throw new Error("Failed to fetch vendors");
-        const data = await response.json();
-        setVendors(data);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-
-    fetchVendors();
-  }, []);
-
-  const fetchMenuItems = async () => {
-    try {
-      const response = await fetch(`https://dev.digitalexamregistration.com/api/getMenuItems?restaurantId=${restaurant._id}`);
-      if (!response.ok) throw new Error("Failed to fetch menu items");
-      const data = await response.json();
-      setMenuItems(data);
-      setUpdatedMenuItems(data);
-      setError(null); // Clear any previous errors
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleAddToCart = (item) => {
+    addToCart({ ...item, quantity: 1, addOns: [] });
   };
 
-  useEffect(() => {
-    if (restaurant) {
-      fetchMenuItems();
-    }
-  }, [restaurant]);
-
-  useEffect(() => {
-    const fetchProductPricing = async () => {
-      if (!selectedVendor) return;
-
-      try {
-        const response = await fetch(
-          `https://dev.digitalexamregistration.com/api/getProductPricing?vendorId=${selectedVendor._id}&restaurantId=${restaurant._id}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch product pricing");
-        const data = await response.json();
-
-        const updatedItems = menuItems.map((item) => {
-          const pricingForItem = data.pricing.find(
-            (pricing) => pricing.menuItemId._id.toString() === item._id.toString()
-          );
-          if (pricingForItem) {
-            return { 
-              ...item, 
-              price: priceType === "sale" ? pricingForItem.salePrice : pricingForItem.purchasePrice 
-            };
-          }
-          return item;
-        });
-
-        setUpdatedMenuItems(updatedItems);
-        setError(null); // Clear any previous errors
-      } catch (error) {
-        // Instead of setting the error, just fetch the menu items again
-        await fetchMenuItems(); // Wait for the menu items to be fetched
-      }
-    };
-
-    fetchProductPricing();
-  }, [selectedVendor, menuItems, restaurant._id, priceType]); // Add priceType to dependency array
-
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  useEffect(() => {
-    if (vendors.length > 0) {
-      const vendorId = localStorage.getItem("vendorId");
-      if (vendorId) {
-        const vendor = vendors.find((vendor) => vendor._id === vendorId);
-        if (vendor) {
-          setSelectedVendor(vendor);
-        }
+  const handleQuantityChange = (item, operation) => {
+    if (operation === "increment") {
+      addToCart({ ...item, quantity: item.quantity + 1 });
+    } else if (operation === "decrement") {
+      if (item.quantity > 1) {
+        addToCart({ ...item, quantity: item.quantity - 1 });
+      } else {
+        removeFromCart(item.id);
       }
     }
-  }, [vendors]);
-
-  const handleVendorChange = (e) => {
-    const vendorId = e.target.value;
-    const selectedVendor = vendors.find((vendor) => vendor._id === vendorId);
-    setSelectedVendor(selectedVendor);
-    localStorage.setItem("vendorId", vendorId);
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -138,21 +65,11 @@ const Menu = ({ restaurant, addToCart }) => {
     <section className="menu my-8">
       <div className="menu-head">
         <h2 className="Restitle">{restaurant.name} - Menu</h2>
-        <button className="back" onClick={() => window.location.href = '/home'}>
+        <button className="back" onClick={() => (window.location.href = "/home")}>
           Back to Restaurants
         </button>
       </div>
 
-      {/* Price type dropdown is permanently hidden */}
-      {/* <div className="price-type-select">
-        <label htmlFor="price-type">Select Price Type: </label>
-        <select id="price-type" value={priceType} onChange={(e) => setPriceType(e.target.value)}>
-          <option value="sale">Sale Price</option>
-          <option value="purchase">Purchase Price</option>
-        </select>
-      </div> */}
-
-      {/* Filter options for menu items */}
       <div className="filter-options">
         {menuTypes.map((type) => (
           <button
@@ -169,29 +86,47 @@ const Menu = ({ restaurant, addToCart }) => {
         <p>No menu items available for {filter}.</p>
       ) : (
         <div className="menu-grid">
-          {filteredItems.map((item, index) => (
-            <div
-              key={index}
-              className="menu-card"
-              onClick={() => handleItemClick(item)}
-            >
-              <img
-                src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
-                alt={item.name}
-                className="menu-img"
-              />
-              <div className="menu-info">
-                <h3 className="menu-name">{item.name}</h3>
-                <p className="menu-desc">{item.description}</p>
-                <span className="menu-price">₹ {item.price}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+          {filteredItems.map((item, index) => {
+            const cartItem = cart.find((cartItem) => cartItem.id === item.id);
+            return (
+              <div key={index} className="menu-card">
+                {/* Show Veg or Non-Veg Logo */}
+                <img
+  src={item.type === "Veg" ? vegLogo : nonVegLogo}
+  alt={item.type === "Veg" ? "Veg" : "Non-Veg"}
+  className="food-logo"
+/>
 
-      {isModalOpen && selectedItem && (
-        <ItemModal item={selectedItem} closeModal={handleCloseModal} addToCart={addToCart} />
+
+                <img
+                  src={`https://dev.digitalexamregistration.com/api/${item.imgPath}`}
+                  alt={item.name}
+                  className="menu-img"
+                />
+                <div className="menu-info">
+                  <h3 className="menu-name">{item.name}</h3>
+                  <p className="menu-desc">{item.description}</p>
+                  <span className="menu-price">₹ {item.price}</span>
+                  {cartItem ? (
+                    <div className="item-quantity">
+                      <button className="quantity-btn" onClick={() => handleQuantityChange(cartItem, "decrement")}>
+                        −
+                      </button>
+                      <span className="quantity-value">{cartItem.quantity}</span>
+                      <button className="quantity-btn" onClick={() => handleQuantityChange(cartItem, "increment")}>
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <button className="add-to-cart-btn" onClick={() => handleAddToCart(item)}>
+                      Add to Cart
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </section>
   );

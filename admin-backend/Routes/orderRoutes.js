@@ -100,40 +100,19 @@ router.post("/markOrderProcessed", async (req, res) => {
 // Fetch all orders with vendor names
 router.get("/getOrder", async (req, res) => {
   try {
-    const orders = await Order.find().lean();
+    const { vendorId } = req.query;
+
+    if (!vendorId) {
+      return res.status(400).json({ error: "Vendor ID is required." });
+    }
+
+    const orders = await Order.find({ "cart.vendorId": vendorId }).lean();
 
     if (!orders.length) {
-      return res.status(404).json({ error: "No orders found." });
+      return res.status(404).json({ error: "No orders found for this vendor." });
     }
 
-    const vendorIds = [...new Set(orders.flatMap(order => order.cart.map(item => item.vendorId)))];
-
-    const vendors = await Vendor.find({ _id: { $in: vendorIds } });
-    const vendorMap = vendors.reduce((acc, vendor) => {
-      acc[vendor._id.toString()] = vendor.vendorName;
-      return acc;
-    }, {});
-
-    const unmatchedVendors = vendorIds.filter(id => !vendorMap[id]);
-    if (unmatchedVendors.length) {
-      console.warn("Unmatched vendor IDs:", unmatchedVendors);
-    }
-
-    const enrichedOrders = orders.map(order => {
-      // Ensure the date is in UTC ISO format
-      const formattedDate = order.date ? order.date.toISOString() : null;
-
-      return {
-        ...order,
-        cart: order.cart.map(item => ({
-          ...item,
-          vendorName: vendorMap[item.vendorId] || `Unknown Vendor (${item.vendorId})`,
-        })),
-        orderDate: formattedDate,
-      };
-    });
-
-    res.status(200).json(enrichedOrders);
+    res.status(200).json(orders);
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.status(500).json({ error: "Failed to fetch orders", details: error.message });
