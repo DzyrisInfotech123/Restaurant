@@ -98,6 +98,16 @@ router.get('/getRestaurant', async (req, res) => {
   }
 });
 
+router.get("/getRestaurants", async (req, res) => {
+  try {
+      const restaurants = await Restaurant.find(); // Fetch all restaurants
+      res.json(restaurants);
+  } catch (error) {
+      res.status(500).json({ error: "Failed to fetch restaurants" });
+  }
+});
+
+
 // Delete Restaurant
 router.delete('/deleteRestaurant/:id', async (req, res) => {
   try {

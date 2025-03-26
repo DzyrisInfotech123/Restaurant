@@ -13,6 +13,7 @@ const vendorRoutes = require('./VendorRoutes');
 const productPricing = require('./ProductPricingRoutes');
 const orderRoutes = require('./orderRoutes');
 const inventoryRoutes = require('./InventoryRoutes');
+const productionRoutes = require('./ProductionRoutes')
 
 const app = express();
 const PORT = process.env.PORT || 4100;
@@ -54,6 +55,7 @@ app.use('/api', vendorRoutes);
 app.use('/api', productPricing);
 app.use('/api', orderRoutes);
 app.use('/api', inventoryRoutes);
+app.use('/api', productionRoutes)
 
 // Default route
 app.get('/', (req, res) => {

@@ -100,7 +100,7 @@ const Header = ({ priceType }) => { // Accept priceType as a prop
                 <i className="fas fa-user-circle"></i> Profile
               </li>
               <li onClick={handleSaleOrdersClick}>
-                <i className="fas fa-tags"></i> Sale Orders
+                <i className="fas fa-tags"></i> Your Orders
               </li>
               <li onClick={handleLogin}>
                 <i className="fas fa-sign-out-alt"></i> Logout

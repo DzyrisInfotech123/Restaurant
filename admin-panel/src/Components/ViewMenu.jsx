@@ -19,11 +19,27 @@ const ViewMenu = () => {
   const fetchRestaurants = async () => {
     try {
       const vendorId = localStorage.getItem("vendorId"); // Get vendorId from local storage
-      const { data } = await axios.get(`/getRestaurant?vendorId=${vendorId}`); // Fetch restaurants by vendorId
-      setRestaurants(data);
+      const role = localStorage.getItem("role"); // Get user role from local storage
+
+      let { data: vendorRestaurants } = await axios.get(`/getRestaurant?vendorId=${vendorId}`); // Fetch vendor restaurants
+
+      let allRestaurants = [];
+      if (role === "admin") {
+        // If user is admin, fetch all restaurants
+        const response = await axios.get(`/getRestaurant`);
+        allRestaurants = response.data.filter((restaurant) => restaurant.default === "true");
+      }
+
+      // Merge default restaurants with vendor-specific ones, avoiding duplicates
+      const mergedRestaurants = [...vendorRestaurants, ...allRestaurants].filter(
+        (restaurant, index, self) =>
+          index === self.findIndex((r) => r._id === restaurant._id) // Ensure unique restaurants
+      );
+
+      setRestaurants(mergedRestaurants);
     } catch (error) {
-      console.error('Error fetching restaurants:', error);
-      message.error('Failed to fetch restaurants.');
+      console.error("Error fetching restaurants:", error);
+      message.error("Failed to fetch restaurants.");
     }
   };
 
@@ -44,7 +60,7 @@ const ViewMenu = () => {
       price: item.price,
       description: item.description,
     });
-    setAddOns(item.addOns || []); // Load addOns if they exist
+    setAddOns(item.addOns || []);
     setFileList(item.imgPath ? [{ url: `https://dev.digitalexamregistration.com/api/${item.imgPath}` }] : []);
   };
 
@@ -53,52 +69,30 @@ const ViewMenu = () => {
     formData.append('name', values.name);
     formData.append('price', values.price);
     formData.append('description', values.description);
-    formData.append('addOns', JSON.stringify(addOns)); // Include addOns in the form data
+    formData.append('addOns', JSON.stringify(addOns));
 
-    // Check if a new image is uploaded and append it
     if (fileList.length > 0 && fileList[0].originFileObj) {
       formData.append('img', fileList[0].originFileObj);
     }
 
     try {
       const response = await axios.put(`/updateMenuItem/${editingItem._id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       message.success('Menu item updated successfully');
-
-      // Update the local state with the edited item
       setMenuItems(menuItems.map(item =>
-        item._id === editingItem._id
-          ? { ...item, ...values, addOns, imgPath: response.data.imgPath || item.imgPath }
-          : item
+        item._id === editingItem._id ? { ...item, ...values, addOns, imgPath: response.data.imgPath || item.imgPath } : item
       ));
 
       setEditingItem(null);
       form.resetFields();
       setFileList([]);
-      setAddOns([]); // Reset addOns
+      setAddOns([]);
     } catch (error) {
       console.error('Error updating menu item:', error);
       message.error('Failed to update menu item.');
     }
-  };
-
-  const handleAddAddOn = () => {
-    setAddOns([...addOns, { name: '', price: 0 }]); // Add a blank addOn with name and price
-  };
-
-  const handleRemoveAddOn = (index) => {
-    const updatedAddOns = addOns.filter((_, i) => i !== index);
-    setAddOns(updatedAddOns);
-  };
-
-  const handleAddOnChange = (value, field, index) => {
-    const updatedAddOns = [...addOns];
-    updatedAddOns[index][field] = value; // Update the specific field (name or price)
-    setAddOns(updatedAddOns);
   };
 
   const handleDeleteMenuItem = async (id) => {
@@ -129,9 +123,9 @@ const ViewMenu = () => {
               }}
             >
               <img
-                src={`https://dev.digitalexamregistration.com/api/${restaurant.imgPath}`} // Restaurant image path
+                src={`https://dev.digitalexamregistration.com/api/${restaurant.imgPath}`}
                 alt={restaurant.name}
-                style={{ width: '30%', height: '75px', objectFit: 'cover' }} // Adjust image size and fit
+                style={{ width: '30%', height: '75px', objectFit: 'cover' }}
               />
               <p>Click to view menu</p>
             </Card>
@@ -147,7 +141,7 @@ const ViewMenu = () => {
           />
           {menuItems.length > 0 ? (
             <Table
-              dataSource={menuItems.map((item, index ) => ({
+              dataSource={menuItems.map((item, index) => ({
                 ...item,
                 key: index,
               }))}
@@ -179,10 +173,7 @@ const ViewMenu = () => {
                         okText="Yes"
                         cancelText="No"
                       >
-                        <Button
-                          type="danger"
-                          style={{ border: "1px solid red", color: "red" }}
-                        >
+                        <Button type="danger" style={{ border: "1px solid red", color: "red" }}>
                           Delete
                         </Button>
                       </Popconfirm>
@@ -195,134 +186,11 @@ const ViewMenu = () => {
           ) : (
             <p>No menu available for this restaurant.</p>
           )}
-          <button
-            style={{ marginTop: '20px' }}
-            onClick={() => setSelectedRestaurant(null)}
-          >
+          <button style={{ marginTop: '20px' }} onClick={() => setSelectedRestaurant(null)}>
             Back to Restaurants
           </button>
         </>
       )}
-
-      {/* Edit Menu Item Modal */}
-      <Modal
-        visible={editingItem !== null}
-        title={`Edit ${editingItem?.name}`}
-        onCancel={() => {
-          setEditingItem(null);
-          form.resetFields();
-          setFileList([]); // Reset file list
-          setAddOns([]); // Reset addOns
-        }}
-        footer={null}
-      >
-        <Form
-          form={form}
-          onFinish={handleSubmitEdit}
-          initialValues={{
-            name: editingItem?.name,
-            price: editingItem?.price,
-            description: editingItem?.description,
-            imgPath: editingItem?.imgPath,
-          }}
-        >
-          <Form.Item
-            name="name"
-            label="Item Name"
-            rules={[{ required: true, message: 'Please enter the item name' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="price"
-            label="Price"
-            rules={[{ required: true, message: 'Please enter the price' }]}
-          >
-            <InputNumber 
-              min={0} 
-              onKeyPress={(e) => {
-                // Allow only numbers and decimal point
-                if (!/[0-9.]/.test(e.key)) {
-                  e.preventDefault();
-                }
-              }} 
-            />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[{ required: true, message: 'Please enter the description' }]}
-          >
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item name="imgPath" label="Image">
-            <Upload
-              listType="picture"
-              beforeUpload={() => false} // Prevent auto upload
-              fileList={fileList}
-              onChange={({ fileList: newFileList }) => setFileList(newFileList)}
-            >
-              <Button icon={<UploadOutlined />}>Click to upload</Button>
-            </Upload>
-            {fileList.length > 0 && fileList[0].url && (
-              <img
-                src={fileList[0].url}
-                alt="Menu Item"
-                style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px' }}
-              />
-            )}
-          </Form.Item>
-
-          {/* Add-ons */}
-          <Form.Item label="Add-Ons">
-            <Button type="dashed" onClick={handleAddAddOn}>Add Add-On</Button>
-            <div style={{ marginTop: '10px' }}>
-              {addOns.map((addOn, index) => (
-                <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <Input
-                    value={addOn.name}
-                    onChange={(e) => handleAddOnChange(e.target.value, 'name', index)}
-                    placeholder="Add-On Name"
-                    style={{ width: '40%' }}
-                  />
-                  <InputNumber
-                    value={addOn.price}
-                    onChange={(value) => handleAddOnChange(value, ' price', index)}
-                    placeholder="Price"
-                    min={0}
-                    style={{ width: '40%', marginLeft: '10px' }}
-                    onKeyPress={(e) => {
-                      // Allow only numbers and decimal point
-                      if (!/[0-9.]/.test(e.key)) {
-                        e.preventDefault();
-                      }
-                    }} 
-                  />
-                  <Popconfirm
-                    title="Are you sure you want to remove this add-on?"
-                    onConfirm={() => handleRemoveAddOn(index)}
-                    okText="Yes"
-                    cancelText="No"
-                  >
-                    <Button
-                      type="danger"
-                      style={{ marginLeft: '10px' }}
-                    >
-                      Remove
-                    </Button>
-                  </Popconfirm>
-                </div>
-              ))}
-            </div>
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Save Changes
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
     </>
   );
 };

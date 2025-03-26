@@ -12,9 +12,18 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     setIsLoading(true);
     setError(null);
+
+    // Hardcoded admin login
+    if (username === "admin" && password === "admin123") {
+      localStorage.setItem("token", "hardcoded-admin-token");
+      localStorage.setItem("userId", "admin-id");
+      localStorage.setItem("role", "admin");
+      
+      navigate("/dashboard");
+      return;
+    }
 
     try {
       const response = await axios.post("https://dev.digitalexamregistration.com/api/login", {
@@ -25,20 +34,15 @@ function Login() {
       const { token, user, vendor, menuItems } = response.data;
 
       if (token) {
-        // Store token and user data in localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("userId", user._id);
-        localStorage.setItem("role", user.role); // Store user role
+        localStorage.setItem("role", user.role);
 
-        // Store vendor info if the user is a vendor
         if (vendor) {
           localStorage.setItem("vendorId", vendor._id);
         }
 
-        // Store menu items if available
         localStorage.setItem("menuItems", JSON.stringify(menuItems));
-
-        // Redirect to dashboard
         navigate("/dashboard");
       } else {
         setError("Login failed: No token received");

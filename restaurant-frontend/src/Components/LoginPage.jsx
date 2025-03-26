@@ -44,7 +44,7 @@ function LoginPage() {
         localStorage.setItem("menuItems", JSON.stringify(menuItems));
 
         // Redirect to home page or dashboard based on the role
-        navigate("/mode");
+        navigate("/home");
       } else {
         alert("Login failed: No token received");
       }

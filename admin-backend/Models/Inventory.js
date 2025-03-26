@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const InventorySchema = new mongoose.Schema({
-  vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
   stock: [
     {

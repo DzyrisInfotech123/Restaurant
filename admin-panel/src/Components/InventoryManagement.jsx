@@ -1,25 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { Select, Table, Input, Button, message } from "antd";
+import { Select, Table, Input, Button, message, Modal, Form, InputNumber, Upload, Space } from "antd";
+import { UploadOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "./Services/Api";
 
+const { Option } = Select;
+
 const InventoryManagement = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [restaurants, setRestaurants] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [stockData, setStockData] = useState({});
   const [updatedStock, setUpdatedStock] = useState({});
   const [editableRows, setEditableRows] = useState({});
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     fetchRestaurants();
-    fetchUnprocessedOrders(); // Fetch only unprocessed orders
-  }, []);
+
+    if (location.pathname === "/addmenu") {
+      setIsModalVisible(true);
+    }
+  }, [location.pathname]);
 
   const fetchRestaurants = async () => {
     try {
-      const vendorId = localStorage.getItem("vendorId");
-      const { data } = await axios.get(`/getRestaurant?vendorId=${vendorId}`);
+      const { data } = await axios.get(`/getRestaurant`);
       setRestaurants(data);
+
+      if (data.length > 0) {
+        setSelectedRestaurant(data[0]._id);
+        fetchMenuItems(data[0]._id);
+      }
     } catch (error) {
       message.error("Failed to fetch restaurants.");
     }
@@ -27,13 +42,11 @@ const InventoryManagement = () => {
 
   const fetchMenuItems = async (restaurantId) => {
     try {
-      const vendorId = localStorage.getItem("vendorId");
-
       const { data: menuItemsData } = await axios.get(`/getMenuItems?restaurantId=${restaurantId}`);
       setMenuItems(menuItemsData);
 
-      // Fetch stock data from DB
-      const { data: stockResponse } = await axios.get(`/getStock?vendorId=${vendorId}&restaurantId=${restaurantId}`);
+      // Fetch stock only based on restaurant (no vendor ID)
+      const { data: stockResponse } = await axios.get(`/getStock?restaurantId=${restaurantId}`);
       const stockMap = {};
       stockResponse.stock.forEach((stockItem) => {
         stockMap[stockItem.menuItemId._id] = stockItem.inStock;
@@ -73,10 +86,8 @@ const InventoryManagement = () => {
 
   const handleSaveStock = async () => {
     try {
-      const vendorId = localStorage.getItem("vendorId");
-
-      if (!vendorId || !selectedRestaurant) {
-        message.error("Vendor or restaurant selection is missing.");
+      if (!selectedRestaurant) {
+        message.error("Restaurant selection is missing.");
         return;
       }
 
@@ -91,7 +102,6 @@ const InventoryManagement = () => {
       }
 
       await axios.post(`/updateStock`, {
-        vendorId,
         restaurantId: selectedRestaurant,
         stockUpdates,
       });
@@ -103,68 +113,18 @@ const InventoryManagement = () => {
     }
   };
 
-  const fetchUnprocessedOrders = async () => {
-    try {
-      const vendorId = localStorage.getItem("vendorId");
-  
-      // Fetch only unprocessed orders (processed=false)
-      const { data: orders } = await axios.get(`/getOrders?vendorId=${vendorId}&processed=false`);
-  
-      for (const order of orders) {
-        for (const item of order.cart) {
-          await updateStockOnOrder(item, order.priceType);
-        }
-  
-        // ✅ Mark order as processed **after stock update**
-        await axios.post(`/markOrderProcessed`, { orderId: order._id });
-      }
-    } catch (error) {
-      message.error("Failed to fetch orders.");
-    }
-  };
-  
-
-  const updateStockOnOrder = async (orderItem, orderType) => {
-    try {
-      const vendorId = localStorage.getItem("vendorId");
-      const restaurantId = orderItem.restaurantId;
-      const itemId = orderItem._id;
-      const quantity = orderItem.quantity;
-
-      // Get the latest stock from DB
-      const { data: stockResponse } = await axios.get(`/getStock?vendorId=${vendorId}&restaurantId=${restaurantId}`);
-      const currentStock = stockResponse.stock.find((stockItem) => stockItem.menuItemId._id === itemId)?.inStock || 0;
-
-      let newStock = currentStock;
-      if (orderType === "sale") {
-        newStock = Math.max(0, currentStock - quantity);
-      } else if (orderType === "purchase") {
-        newStock = currentStock + quantity;
-      }
-
-      await axios.post(`/updateStock`, {
-        vendorId,
-        restaurantId,
-        stockUpdates: [{ itemId, inStock: newStock }],
-      });
-
-      fetchMenuItems(restaurantId);
-    } catch (error) {
-      message.error("Failed to update stock based on order.");
-    }
-  };
-
   return (
     <div style={{ padding: "20px" }}>
       <Select
         placeholder="Select a restaurant"
         style={{ width: 300, marginBottom: "20px" }}
+        value={selectedRestaurant || (restaurants.length > 0 ? restaurants[0]._id : undefined)}
         onChange={handleRestaurantChange}
       >
         {restaurants.map((restaurant) => (
-          <Select.Option key={restaurant._id} value={restaurant._id}>
+          <Option key={restaurant._id} value={restaurant._id}>
             {restaurant.name}
-          </Select.Option>
+          </Option>
         ))}
       </Select>
 
@@ -191,9 +151,9 @@ const InventoryManagement = () => {
               { title: "Item", dataIndex: "name", key: "name" },
               { title: "Price", dataIndex: "price", key: "price" },
               {
-                title: "In Stock",
-                dataIndex: "inStock",
-                key: "inStock",
+                title: "Current Stock",
+                dataIndex: "Current Stock",
+                key: "Current Stock",
                 render: (text, record) => (
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <Input

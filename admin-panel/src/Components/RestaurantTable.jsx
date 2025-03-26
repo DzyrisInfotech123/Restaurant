@@ -1,23 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Button, message, Popconfirm, Modal } from 'antd';
-import axios from './Services/Api'; // Correct import
-import AddRestaurant from './AddRestaurant'; // Import AddRestaurant component
+import React, { useEffect, useState } from "react";
+import { Table, Button, message, Popconfirm, Modal } from "antd";
+import axios from "./Services/Api"; // Correct API import
+import AddRestaurant from "./AddRestaurant"; // Import AddRestaurant component
 
 const RestaurantTable = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingRestaurant, setEditingRestaurant] = useState(null); // State for the restaurant being edited
+  const [editingRestaurant, setEditingRestaurant] = useState(null); // Restaurant being edited
 
-  // Fetch restaurants from the API
+  // Fetch restaurants based on role
   const fetchRestaurants = async () => {
     try {
-      const vendorId = localStorage.getItem("vendorId"); // Get vendorId from local storage
-      const { data } = await axios.get(`/getRestaurant?vendorId=${vendorId}`); // Fetch restaurants by vendorId
+      setLoading(true);
+      const role = localStorage.getItem("role"); // Get role from localStorage
+      const vendorId = localStorage.getItem("vendorId"); // Get vendorId from localStorage
+
+      let url = "/getRestaurant";
+
+      if (role === "admin") {
+        // Admin sees only restaurants where default: true
+        url += "?default=true";
+      } else if (vendorId) {
+        // Vendor sees only their assigned restaurants
+        url += `?vendorId=${vendorId}`;
+      }
+
+      const { data } = await axios.get(url);
       setRestaurants(data);
     } catch (error) {
-      console.error('Error fetching restaurants:', error);
-      message.error('Failed to fetch restaurants.');
+      console.error("Error fetching restaurants:", error);
+      message.error("Failed to fetch restaurants.");
     } finally {
       setLoading(false);
     }
@@ -26,62 +39,62 @@ const RestaurantTable = () => {
   // Delete restaurant
   const deleteRestaurant = async (id) => {
     try {
-      await axios.delete(`/deleteRestaurant/${id}`); // Correct the delete route if necessary
-      message.success('Restaurant deleted successfully!');
-      fetchRestaurants(); // Refresh restaurant list
+      await axios.delete(`/deleteRestaurant/${id}`);
+      message.success("Restaurant deleted successfully!");
+      fetchRestaurants();
     } catch (error) {
-      message.error('Failed to delete restaurant.');
+      message.error("Failed to delete restaurant.");
     }
   };
 
   // Handle edit button click
   const handleEditClick = (restaurant) => {
-    setEditingRestaurant(restaurant); // Set the selected restaurant for editing
-    setIsModalOpen(true); // Open the modal
+    setEditingRestaurant(restaurant);
+    setIsModalOpen(true);
   };
 
   // Handle modal close
   const handleModalClose = () => {
-    setEditingRestaurant(null); // Clear the selected restaurant
-    setIsModalOpen(false); // Close the modal
+    setEditingRestaurant(null);
+    setIsModalOpen(false);
   };
 
   // Handle successful edit
   const handleEditSuccess = () => {
-    handleModalClose(); // Close the modal
-    fetchRestaurants(); // Refresh restaurant list
+    handleModalClose();
+    fetchRestaurants();
   };
 
-  // Use effect to fetch restaurants when the component mounts
+  // Fetch restaurants on mount
   useEffect(() => {
     fetchRestaurants();
   }, []);
 
   const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    { title: 'Type', dataIndex: 'type', key: 'type' },
-    { title: 'Price', dataIndex: 'price', key: 'price' },
-    { title: 'Status', dataIndex: 'status', key: 'status' },
+    { title: "Name", dataIndex: "name", key: "name" },
+    { title: "Type", dataIndex: "type", key: "type" },
+    { title: "Price", dataIndex: "price", key: "price" },
+    { title: "Status", dataIndex: "status", key: "status" },
     {
-      title: 'Image',
-      dataIndex: 'imgPath',
-      key: 'imgPath',
+      title: "Image",
+      dataIndex: "imgPath",
+      key: "imgPath",
       render: (text, record) => {
-        const imageUrl = `https://dev.digitalexamregistration.com/api/${record.imgPath}`; // Avoid double slash issue
+        const imageUrl = `https://dev.digitalexamregistration.com/api/${record.imgPath}`;
         return (
           <img
             src={imageUrl}
             alt="Restaurant"
-            style={{ width: '50px', height: '50px' }}
+            style={{ width: "50px", height: "50px" }}
           />
         );
       },
     },
     {
-      title: 'Action',
-      key: 'action',
+      title: "Action",
+      key: "action",
       render: (_, record) => (
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: "flex", gap: "10px" }}>
           <Button type="primary" onClick={() => handleEditClick(record)}>
             Edit
           </Button>
@@ -102,8 +115,8 @@ const RestaurantTable = () => {
         columns={columns}
         dataSource={restaurants}
         loading={loading}
-        rowKey="_id" // Ensure this matches your backend ID field
-        pagination={false} // You can enable pagination if the table grows large
+        rowKey="_id"
+        pagination={false}
       />
 
       {/* Modal for editing */}
@@ -111,12 +124,12 @@ const RestaurantTable = () => {
         title="Edit Restaurant"
         open={isModalOpen}
         onCancel={handleModalClose}
-        footer={null} // Footer is not needed as form buttons are inside AddRestaurant
+        footer={null}
       >
         {editingRestaurant && (
           <AddRestaurant
-            restaurantData={editingRestaurant} // Pass the selected restaurant data
-            onUpdateSuccess={handleEditSuccess} // Handle successful update
+            restaurantData={editingRestaurant}
+            onUpdateSuccess={handleEditSuccess}
           />
         )}
       </Modal>

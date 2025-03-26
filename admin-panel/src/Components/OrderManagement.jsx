@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { message, Button, Modal, Form, Input, Popconfirm, InputNumber, Select } from "antd";
-import { jsPDF } from "jspdf";
-import "./OrderManagement.css";
+import { message, Button, Modal, Form, Input, Popconfirm, Select } from "antd";
 import axios from "./Services/Api";
-import {
-  Stepper,
-  Step,
-  StepLabel,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useLocation } from "react-router-dom";
 import moment from "moment";
 
 const OrderManagement = () => {
-  const location = useLocation();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
@@ -24,8 +13,9 @@ const OrderManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [restaurantId, setRestaurantId] = useState(null); // Store restaurantId from API response
 
-  // Define status options
+  // Order status options
   const statusOptions = [
     { value: "booked", label: "Booked" },
     { value: "confirmed", label: "Confirmed" },
@@ -36,38 +26,30 @@ const OrderManagement = () => {
     { value: "cancelled", label: "Cancelled" },
   ];
 
-  const getDisabledStatuses = (selectedStatus) => {
-    const statusOrder = statusOptions.map(option => option.value);
-    const selectedIndex = statusOrder.indexOf(selectedStatus);
-    return statusOrder.slice(0, selectedIndex);
-  };
-
-  // Fetch orders
+  // Fetch orders on component mount
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  // Filter orders based on search query
   useEffect(() => {
     const filtered = orders.filter(
       (order) =>
-        order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        order.priceType === "sale"
+        order.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (!order.priceType || order.priceType === "purchase")
     );
     setFilteredOrders(filtered);
   }, [searchQuery, orders]);
 
+  // Fetch orders and extract restaurantId
   const fetchOrders = async () => {
     try {
-      const vendorId = localStorage.getItem("vendorId");
-
-      if (!vendorId) {
-        setError("Vendor ID is missing.");
-        setLoading(false);
-        return;
+      const { data } = await axios.get(`/getAllOrders`);
+  
+      if (data.length > 0) {
+        setRestaurantId(data[0]?.restaurantId); // Ensure we store the first restaurantId
       }
-
-      const { data } = await axios.get(`/getOrder?vendorId=${vendorId}`);
-
+  
       setOrders(data);
       setFilteredOrders(data);
       setLoading(false);
@@ -77,41 +59,45 @@ const OrderManagement = () => {
       setLoading(false);
     }
   };
+  
 
+  // Open edit modal with order details
   const handleEdit = (order) => {
     setEditingOrder(order);
     form.setFieldsValue({
       orderNumber: order.orderNumber,
-      cart: order.cart || [],
       status: order.status || "booked",
     });
   };
 
+  // Delete an order
   const handleDeleteOrder = async (id) => {
     try {
       await axios.delete(`/deleteOrder/${id}`);
       message.success("Order deleted successfully");
-      setOrders(orders.filter((order) => order._id !== id));
-      setFilteredOrders(filteredOrders.filter((order) => order._id !== id));
+      setOrders((prevOrders) => prevOrders.filter((order) => order._id !== id));
+      setFilteredOrders((prevOrders) => prevOrders.filter((order) => order._id !== id));
     } catch (error) {
       console.error("Error deleting order:", error);
       message.error("Failed to delete order.");
     }
   };
 
+  // Save order updates
   const handleSave = async (values) => {
     try {
       const existingOrder = orders.find(order => order.orderNumber === values.orderNumber);
-
-      const updatedCart = values.cart.map((item, index) => {
-        const existingItem = existingOrder.cart[index];
-        return {
-          ...existingItem,
-          quantity: item.quantity,
-          totalPrice: existingItem.price * item.quantity,
-        };
-      });
-
+      if (!existingOrder) {
+        message.error("Order not found.");
+        return;
+      }
+  
+      const updatedCart = existingOrder.cart.map((item) => ({
+        ...item,
+        quantity: item.quantity,
+        totalPrice: item.price * item.quantity,
+      }));
+  
       const payload = {
         cart: updatedCart,
         subtotal: updatedCart.reduce((acc, item) => acc + item.totalPrice, 0),
@@ -120,22 +106,47 @@ const OrderManagement = () => {
         date: new Date().toISOString(),
         status: values.status,
       };
-
-      const response = await axios.put(`/updateOrder/${values.orderNumber}`, payload);
+  
+      const { data } = await axios.put(`/updateOrder/${values.orderNumber}`, payload);
       message.success("Order updated successfully");
-      setOrders(orders.map((order) => (order.orderNumber === values.orderNumber ? response.data : order)));
-      setFilteredOrders(filteredOrders.map((order) => (order.orderNumber === values.orderNumber ? response.data : order)));
+  
+      setOrders((prevOrders) => prevOrders.map(order =>
+        order.orderNumber === values.orderNumber ? { ...order, ...data } : order
+      ));
+      setFilteredOrders((prevOrders) => prevOrders.map(order =>
+        order.orderNumber === values.orderNumber ? { ...order, ...data } : order
+      ));
+  
+      // 🛠 Extract `restaurantId` from the first cart item instead
+      const restaurantId = existingOrder.cart.length > 0 ? existingOrder.cart[0].restaurantId : null;
+  
+      if (values.status === "confirmed") {
+        if (!restaurantId) {
+          message.error("❌ Restaurant ID is missing. Unable to update stock.");
+          return;
+        }
+  
+        const stockUpdates = updatedCart.map((item) => ({
+          itemId: item._id, // Ensure this matches your inventory schema
+          inStock: -Math.abs(item.quantity),
+        }));
+  
+        console.log("📦 Sending stock update request:", { restaurantId, stockUpdates });
+  
+        await axios.put(`/updateStock`, { restaurantId, stockUpdates });
+        message.success("Stock deducted from inventory");
+      }
+  
       setEditingOrder(null);
       form.resetFields();
     } catch (error) {
-      console.error("Error updating order:", error);
-      message.error("Failed to update order.");
+      console.error("❌ Error updating order:", error);
+      message.error(error.response?.data?.message || "Failed to update order.");
     }
   };
-
-  const formatDate = (date) => {
+    const formatDate = (date) => {
     const parsedDate = moment(date);
-    return parsedDate.isValid() ? parsedDate.format('MMMM DD, YYYY') : "Invalid Date";
+    return parsedDate.isValid() ? parsedDate.format("MMMM DD, YYYY") : "Invalid Date";
   };
 
   if (loading) return <div>Loading...</div>;
@@ -199,15 +210,12 @@ const OrderManagement = () => {
 
       <Modal open={editingOrder !== null} onCancel={() => { setEditingOrder(null); form.resetFields(); }} footer={null}>
         <Form form={form} onFinish={handleSave}>
-          <Form.Item label="Order Number" name="orderNumber">
-            <Input disabled />
-          </Form.Item>
+          <Form.Item label="Order Number" name="orderNumber"><Input disabled /></Form.Item>
           <Form.Item label="Delivery Status" name="status">
-            <Select>
+            <Select onChange={() => form.submit()}>
               {statusOptions.map(option => <Select.Option key={option.value} value={option.value}>{option.label}</Select.Option>)}
             </Select>
           </Form.Item>
-          <Button type="primary" htmlType="submit">Save Changes</Button>
         </Form>
       </Modal>
     </div>

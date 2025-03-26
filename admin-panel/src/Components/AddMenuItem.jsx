@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, InputNumber, Select, Upload, Button, Space, message } from "antd";
 import { UploadOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
-import axios from "./Services/Api"; // Correct import
+import axios from "./Services/Api"; 
+
 const { Option } = Select;
 
 const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
@@ -10,22 +11,35 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   const [types] = useState(["Veg", "Non-Veg", "SeekhKebab"]);
   const isEditing = !!menuItemData;
 
-  // Retrieve vendorId from local storage
-  const vendorId = localStorage.getItem('vendorId');
+  // Retrieve role and vendorId from local storage
+  const role = localStorage.getItem("role");
+  const vendorId = localStorage.getItem("vendorId")?.trim(); // Trim vendorId
 
   useEffect(() => {
-    console.log("Vendor ID in AddMenuItem:", vendorId); // Debugging statement
+    console.log("Role:", role, "Vendor ID:", vendorId);
 
-    // Fetch restaurants for dropdown
     const fetchRestaurants = async () => {
       try {
-        const { data } = await axios.get("/getRestaurant");
-        console.log("Fetched restaurants:", data); // Log the fetched data
+        const response = await axios.get("/getRestaurants");
+        console.log("Full API Response:", response);
 
-        // Filter restaurants based on vendorId
-        const filteredRestaurants = data.filter(restaurant => restaurant.vendorId === vendorId);
-        console.log("Filtered restaurants:", filteredRestaurants); // Log the filtered data
+        if (!response?.data) {
+          console.error("No data received from API");
+          return;
+        }
 
+        console.log("Fetched restaurants:", response.data);
+
+        let filteredRestaurants = response.data;
+
+        if (role === "admin") {
+          // Ensure "default" is checked as a string
+          filteredRestaurants = response.data.filter((restaurant) => restaurant.default === "true");
+        } else if (vendorId) {
+          filteredRestaurants = response.data.filter((restaurant) => restaurant.vendorId.trim() === vendorId);
+        }
+
+        console.log("Filtered restaurants:", filteredRestaurants);
         setRestaurants(filteredRestaurants);
       } catch (error) {
         console.error("Error fetching restaurants:", error);
@@ -44,20 +58,18 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
                 uid: "-1",
                 name: "existing-image",
                 status: "done",
-                url: `https://dev.digitalexamregistration.com${menuItemData.imgPath}`, // Ensure full URL
+                url: `https://dev.digitalexamregistration.com${menuItemData.imgPath}`,
               },
             ]
           : [],
         addOns: menuItemData.addOns || [],
         restaurantId: menuItemData.restaurantId,
-        price: menuItemData.price || 0, // Set default price to 0
+        price: menuItemData.price || 0,
       });
     } else {
-      form.setFieldsValue({
-        price: 0, // Set default price to 0 when adding a new item
-      });
+      form.setFieldsValue({ price: 0 });
     }
-  }, [form, isEditing, menuItemData, vendorId]);
+  }, [form, isEditing, menuItemData, role, vendorId]);
 
   const onFinish = async (values) => {
     try {
@@ -68,20 +80,17 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
       formData.append("description", values.description);
       formData.append("price", values.price);
       formData.append("addOns", JSON.stringify(values.addOns || []));
-  
+
       if (values.img && values.img[0]?.originFileObj) {
         formData.append("img", values.img[0].originFileObj);
-      } else {
-        console.error("Image file not found in form values.");
       }
-  
+
       const response = await axios.post("/addMenuItem", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       message.success("Menu item added successfully");
-      console.log("Menu item added successfully:", response.data);
-      if (onUpdateSuccess) onUpdateSuccess(); // Call the success callback if provided
+      if (onUpdateSuccess) onUpdateSuccess();
     } catch (error) {
       console.error("Error adding menu item:", error);
       message.error("Failed to add menu item.");
@@ -144,10 +153,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         label="Price"
         rules={[{ required: true, message: "Please enter the price" }]}
       >
-        <InputNumber 
-          min={0} 
-          placeholder="Enter price" 
-        />
+        <InputNumber min={0} placeholder="Enter price" />
       </Form.Item>
 
       {/* Add-ons */}
@@ -171,27 +177,12 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
                   fieldKey={[fieldKey, "price"]}
                   rules={[{ required: true, message: "Missing add-on price" }]}
                 >
-                  <InputNumber 
-                    min={0} 
-                    placeholder="Price" 
-                    onKeyPress={(e) => {
-                      // Allow only numbers and decimal point
-                      if (!/[0-9.]/.test(e.key)) {
-                        e.preventDefault();
-                      }
-                    }} 
-                  />
+                  <InputNumber min={0} placeholder="Price" />
                 </Form.Item>
                 <MinusCircleOutlined onClick={() => remove(name)} />
               </Space>
-              
             ))}
-            <Button
-              type="dashed"
-              onClick={() => add()}
-              icon={<PlusOutlined />}
-              style={{ width: "60%" }}
-            >
+            <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />} style={{ width: "60%" }}>
               Add Add-on
             </Button>
           </>
@@ -205,11 +196,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         valuePropName="fileList"
         getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
       >
-        <Upload
-          name="img"
-          listType="picture"
-          beforeUpload={() => false} // Prevent immediate upload
-        >
+        <Upload name="img" listType="picture" beforeUpload={() => false}>
           <Button icon={<UploadOutlined />}>Click to Upload</Button>
         </Upload>
       </Form.Item>

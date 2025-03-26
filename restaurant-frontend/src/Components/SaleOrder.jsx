@@ -16,7 +16,7 @@ const SaleOrder = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale");
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "purchase");
 
   // Fetch sales orders
   useEffect(() => {
@@ -37,7 +37,7 @@ const SaleOrder = () => {
           setOrders([]);
         } else {
           const updatedOrders = response.data
-            .filter(order => order.priceType === "sale") // Filter for priceType = "sale"
+            .filter(order => order.priceType === "purchase") // Filter for priceType = "sale"
             .map((order) => {
               return {
                 ...order,
@@ -63,7 +63,7 @@ const SaleOrder = () => {
   return (
     <div className="sale-order">
       <Header />
-      <h2>Sale Order Status</h2>
+      <h2>Purchase Order Status</h2>
       <div className="button-container">
         <button className="back" onClick={() => window.location.href = `/home?priceType=${priceType}`}>
           Back to Restaurants
@@ -72,8 +72,8 @@ const SaleOrder = () => {
 
       {error || orders.length === 0 ? (
         <div className="no-orders">
-          <h3>You have no Sale Orders</h3>
-          <p>There are no sale orders associated with your account at the moment.</p>
+          <h3>You have no Purchase Orders</h3>
+          <p>There are no purchase orders associated with your account at the moment.</p>
         </div>
       ) : (
         orders.map((order) => {

@@ -11,9 +11,9 @@ router.post('/addUser', async (req, res) => {
       return res.status(400).json({ error: 'Username, password, and role are required.' });
   }
 
-  if (role === 'vendor'|| role === 'employee' && !vendorId) {
-      return res.status(400).json({ error: 'Vendor ID is required for the vendor role.' });
-  }
+  if ((role === 'vendor' || role === 'employee') && !vendorId) { 
+    return res.status(400).json({ error: 'Vendor ID is required for vendor or employee role.' });
+}
 
   try {
       const newUser = new User({

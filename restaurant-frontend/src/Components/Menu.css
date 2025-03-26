@@ -148,3 +148,7 @@
 .price-type-select select:focus {
   border-color: #4CAF50;
 }
+
+.hidden {
+  display: none;
+}

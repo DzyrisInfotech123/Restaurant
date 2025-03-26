@@ -14,6 +14,7 @@ import VendorSelection from '../VendorSelection';
 import PurchaseOrder from '../PurchaseOrder';
 import InventoryManagement from '../InventoryManagement';
 import ReportPage from '../ReportPage';
+import Production from '../Production';
 
 const { Header, Content, Sider } = Layout;
 
@@ -70,7 +71,7 @@ const Dashboard = () => {
         </>
       );
     }
-    if (selectedMenu === '7') {
+    if (selectedMenu === '7' && userRole === 'admin') {
       return (
         <>
           <h2>Vendor Product Pricing</h2>
@@ -119,6 +120,15 @@ const Dashboard = () => {
         </>
       );
     }
+    if (selectedMenu === '13') {
+      return (
+        <>
+          <h2>Todays Production</h2>
+          <Production/>
+          
+        </>
+      );
+    }
   };
 
   return (
@@ -136,12 +146,13 @@ const Dashboard = () => {
             <Menu.Item key="3">Add Menu</Menu.Item>
             <Menu.Item key="4">Menu Management</Menu.Item>
            {userRole === 'admin' && <Menu.Item key="5">Vendor Management</Menu.Item>} 
-            <Menu.Item key="7">Vendor Product Pricing</Menu.Item>
-            <Menu.Item key="8">Sale Order Management</Menu.Item>
-            {userRole ==='admin' && <Menu.Item key="9">Vendor Selection</Menu.Item>}
-            {userRole ==='admin' && <Menu.Item key="10">Purchase Order Management</Menu.Item>}
+            {userRole === 'admin' && <Menu.Item key="7">Vendor Product Pricing</Menu.Item>}
+            <Menu.Item key="8">Order Management</Menu.Item>
+            {/* {userRole ==='admin' && <Menu.Item key="9">Vendor Selection</Menu.Item>} */}
+            {/* {userRole ==='admin' && <Menu.Item key="10">Purchase Order Management</Menu.Item>} */}
             <Menu.Item key="11">Inventory Management</Menu.Item>
-            <Menu.Item key="12">Report</Menu.Item>
+            {/* <Menu.Item key="12">Report</Menu.Item> */}
+            <Menu.Item key="13">Todays Production</Menu.Item>
           </Menu>
         </Sider>
         <Content style={{ padding: '20px' }}>{renderContent()}</Content>
