@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, message, Popconfirm, Modal } from 'antd';
 import axios from './Services/Api'; 
-import VendorManagement from './VendorManagement'; 
+import VendorManagement from './DistributorManagement'; 
 
 const VendorTable = () => {
   const [vendors, setVendors] = useState([]);

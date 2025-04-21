@@ -5,7 +5,7 @@ export const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
   const [vendorId, setVendorId] = useState(localStorage.getItem("vendorId") || null);
-  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale");
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "purchase");
 
   // Initialize cart for vendor and price type
   const [cart, setCart] = useState(() => {

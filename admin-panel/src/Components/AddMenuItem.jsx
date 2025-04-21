@@ -7,47 +7,37 @@ const { Option } = Select;
 
 const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   const [form] = Form.useForm();
-  const [restaurants, setRestaurants] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [types] = useState(["Veg", "Non-Veg", "SeekhKebab"]);
   const isEditing = !!menuItemData;
 
-  // Retrieve role and vendorId from local storage
   const role = localStorage.getItem("role");
-  const vendorId = localStorage.getItem("vendorId")?.trim(); // Trim vendorId
+  const vendorId = localStorage.getItem("vendorId")?.trim();
 
   useEffect(() => {
-    console.log("Role:", role, "Vendor ID:", vendorId);
-
-    const fetchRestaurants = async () => {
+    const fetchVendors = async () => {
       try {
-        const response = await axios.get("/getRestaurants");
-        console.log("Full API Response:", response);
+        const response = await axios.get("/getVendor");
 
         if (!response?.data) {
           console.error("No data received from API");
           return;
         }
 
-        console.log("Fetched restaurants:", response.data);
+        let filteredVendors = response.data;
 
-        let filteredRestaurants = response.data;
-
-        if (role === "admin") {
-          // Ensure "default" is checked as a string
-          filteredRestaurants = response.data.filter((restaurant) => restaurant.default === "true");
-        } else if (vendorId) {
-          filteredRestaurants = response.data.filter((restaurant) => restaurant.vendorId.trim() === vendorId);
+        if (role !== "admin" && vendorId) {
+          filteredVendors = response.data.filter((vendor) => vendor._id.trim() === vendorId);
         }
 
-        console.log("Filtered restaurants:", filteredRestaurants);
-        setRestaurants(filteredRestaurants);
+        setVendors(filteredVendors);
       } catch (error) {
-        console.error("Error fetching restaurants:", error);
-        message.error("Failed to fetch restaurants.");
+        console.error("Error fetching vendors:", error);
+        message.error("Failed to fetch vendors.");
       }
     };
 
-    fetchRestaurants();
+    fetchVendors();
 
     if (isEditing) {
       form.setFieldsValue({
@@ -63,7 +53,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
             ]
           : [],
         addOns: menuItemData.addOns || [],
-        restaurantId: menuItemData.restaurantId,
+        vendorId: menuItemData.vendorId,
         price: menuItemData.price || 0,
       });
     } else {
@@ -74,7 +64,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   const onFinish = async (values) => {
     try {
       const formData = new FormData();
-      formData.append("restaurantId", values.restaurantId);
+      formData.append("vendorId", values.vendorId);
       formData.append("name", values.name);
       formData.append("type", values.type);
       formData.append("description", values.description);
@@ -82,7 +72,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
       formData.append("addOns", JSON.stringify(values.addOns || []));
 
       if (values.img && values.img[0]?.originFileObj) {
-        formData.append("img", values.img[0].originFileObj);
+        formData.append("imgPath", values.img[0].originFileObj);
       }
 
       const response = await axios.post("/addMenuItem", formData, {
@@ -98,23 +88,25 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
   };
 
   return (
+    <div style={{ padding: "10px"}}>
+      <h1>Add Menu Item</h1>
     <Form form={form} layout="vertical" onFinish={onFinish}>
-      {/* Restaurant Dropdown */}
+      {/* Vendor Dropdown */}
       <Form.Item
-        name="restaurantId"
-        label="Restaurant"
-        rules={[{ required: true, message: "Please select the restaurant" }]}
+        name="vendorId"
+        label="Vendor"
+        rules={[{ required: true, message: "Please select the vendor" }]}
       >
-        <Select placeholder="Select restaurant">
-          {restaurants.map((restaurant) => (
-            <Option key={restaurant._id} value={restaurant._id}>
-              {restaurant.name}
+        <Select placeholder="Select vendor">
+          {vendors.map((vendor) => (
+            <Option key={vendor._id} value={vendor._id}>
+              {vendor.vendorName}
             </Option>
           ))}
         </Select>
       </Form.Item>
 
-      {/* Menu Item Name */}
+      {/* Remaining Fields (Unchanged) */}
       <Form.Item
         name="name"
         label="Menu Item Name"
@@ -123,7 +115,6 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         <Input placeholder="Enter menu item name" />
       </Form.Item>
 
-      {/* Menu Item Type - Dropdown */}
       <Form.Item
         name="type"
         label="Type"
@@ -138,7 +129,6 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         </Select>
       </Form.Item>
 
-      {/* Description */}
       <Form.Item
         name="description"
         label="Description"
@@ -147,7 +137,6 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         <Input.TextArea placeholder="Enter description" />
       </Form.Item>
 
-      {/* Price */}
       <Form.Item
         name="price"
         label="Price"
@@ -156,7 +145,6 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         <InputNumber min={0} placeholder="Enter price" />
       </Form.Item>
 
-      {/* Add-ons */}
       <Form.List name="addOns">
         {(fields, { add, remove }) => (
           <>
@@ -189,14 +177,13 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         )}
       </Form.List>
 
-      {/* Image Upload */}
       <Form.Item
         name="img"
         label="Upload Image"
         valuePropName="fileList"
         getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
       >
-        <Upload name="img" listType="picture" beforeUpload={() => false}>
+        <Upload name="imgPath" listType="picture" beforeUpload={() => false}>
           <Button icon={<UploadOutlined />}>Click to Upload</Button>
         </Upload>
       </Form.Item>
@@ -207,6 +194,7 @@ const AddMenuItem = ({ menuItemData, onUpdateSuccess }) => {
         </Button>
       </Form.Item>
     </Form>
+    </div>
   );
 };
 

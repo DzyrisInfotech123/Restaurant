@@ -1,9 +1,8 @@
-const { v4: uuidv4 } = require("uuid");
+
 const mongoose = require("mongoose");
 
 const menuItemSchema = new mongoose.Schema({
-  id: { type: String, unique: true, default: uuidv4 }, // Unique identifier
-  restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant", required: true },
+  vendorId: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor", required: true },
   name: { type: String, required: true },
   type: { type: String, required: true },
   description: { type: String, required: true },

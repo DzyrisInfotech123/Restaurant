@@ -6,7 +6,7 @@ import Restaurants from "./Restaurants";
 
 const Home = () => {
   const location = useLocation(); // Get the current location
-  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale"); // Retrieve priceType from localStorage
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "purchase"); // Retrieve priceType from localStorage
 
   useEffect(() => {
     // Retrieve priceType from URL query parameters

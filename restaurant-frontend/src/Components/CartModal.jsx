@@ -7,7 +7,7 @@ const CartModal = ({ closeModal }) => {
   const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const priceType = location.state?.priceType || localStorage.getItem("priceType") || "sale";
+  const priceType = location.state?.priceType || localStorage.getItem("priceType") || "purchase";
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
@@ -70,7 +70,7 @@ const CartModal = ({ closeModal }) => {
         totalPrice,
       };
     });
-
+    localStorage.setItem("priceType", "purchase");
     const orderNumber = generateOrderNumber();
     const orderDetails = {
       orderNumber,

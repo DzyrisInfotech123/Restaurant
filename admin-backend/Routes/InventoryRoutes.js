@@ -7,11 +7,10 @@ const Restaurant = require('../Models/Restaurant');
 const router = express.Router();
 
 // Add or update inventory stock (without vendor ID)
-router.put("/updateStock", async (req, res) => {
+router.post("/updateStock", async (req, res) => {
   try {
     const { restaurantId, stockUpdates } = req.body;
 
-    // Validate input
     if (!restaurantId || !Array.isArray(stockUpdates) || stockUpdates.length === 0) {
       return res.status(400).json({ error: "Missing or invalid required fields." });
     }
@@ -27,19 +26,37 @@ router.put("/updateStock", async (req, res) => {
     for (const item of stockUpdates) {
       if (!item.itemId || typeof item.inStock !== "number") {
         console.warn(`⚠️ Skipping invalid item:`, item);
-        continue; // Skip invalid items
+        continue;
       }
 
       console.log(`🔄 Updating stock for Item ID: ${item.itemId}, Quantity: ${item.inStock}`);
 
-      const updateResult = await Inventory.updateOne(
-        { restaurantId, "stock.menuItemId": item.itemId }, // Match restaurant and menuItemId
-        { $inc: { "stock.$.inStock": item.inStock } } // Update only the matching item in stock array
-      );
+      const inventory = await Inventory.findOne({ restaurantId });
 
-      console.log("✅ Update Result:", updateResult);
+      if (!inventory) {
+        // If no inventory exists for the restaurant, create a new one
+        const newInventory = new Inventory({
+          restaurantId,
+          stock: [{ menuItemId: item.itemId, inStock: item.inStock }],
+        });
+        await newInventory.save();
+        updateCount++;
+      } else {
+        // Check if the item already exists in stock
+        const existingStockIndex = inventory.stock.findIndex(
+          (stockItem) => stockItem.menuItemId.toString() === item.itemId
+        );
 
-      if (updateResult.modifiedCount > 0) {
+        if (existingStockIndex !== -1) {
+          // If the item exists, update its stock
+          inventory.stock[existingStockIndex].inStock = item.inStock;
+
+        } else {
+          // If the item does not exist, add it to stock
+          inventory.stock.push({ menuItemId: item.itemId, inStock: item.inStock });
+        }
+
+        await inventory.save();
         updateCount++;
       }
     }
@@ -54,6 +71,66 @@ router.put("/updateStock", async (req, res) => {
     res.status(500).json({ error: "Failed to update stock", details: error.message });
   }
 });
+
+router.put("/updateStock", async (req, res) => {
+  try {
+    const { restaurantId, stockUpdates } = req.body;
+
+    if (!restaurantId || !Array.isArray(stockUpdates) || stockUpdates.length === 0) {
+      return res.status(400).json({ error: "Missing or invalid required fields." });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(restaurantId)) {
+      return res.status(400).json({ error: "Invalid restaurantId format." });
+    }
+
+    console.log("📥 Received Stock Update Request:", JSON.stringify(req.body, null, 2));
+
+    let updateCount = 0;
+
+    for (const item of stockUpdates) {
+      if (!item.itemId || typeof item.inStock !== "number") {
+        console.warn(`⚠️ Skipping invalid item:`, item);
+        continue;
+      }
+
+      console.log(`🔄 Updating stock for Item ID: ${item.itemId}, Quantity: ${item.inStock}`);
+
+      const inventory = await Inventory.findOne({ restaurantId });
+
+      if (!inventory) {
+        return res.status(404).json({ error: "Inventory not found for this restaurant." });
+      }
+
+      // Check if the item already exists in stock
+      const existingStockIndex = inventory.stock.findIndex(
+        (stockItem) => stockItem.menuItemId.toString() === item.itemId
+      );
+
+      if (existingStockIndex !== -1) {
+        // If the item exists, update its stock
+        inventory.stock[existingStockIndex].inStock += item.inStock;
+      } else {
+        // If the item does not exist, add it to stock
+        inventory.stock.push({ menuItemId: item.itemId, inStock: item.inStock });
+      }
+
+      await inventory.save();
+      updateCount++;
+    }
+
+    if (updateCount === 0) {
+      return res.status(404).json({ error: "No stock updated. Items not found." });
+    }
+
+    res.status(200).json({ message: `Stock updated for ${updateCount} items.` });
+  } catch (error) {
+    console.error("❌ Error updating stock:", error);
+    res.status(500).json({ error: "Failed to update stock", details: error.message });
+  }
+});
+
+
 
 // Get stock data for a restaurant (without vendor ID)
 router.get('/getStock', async (req, res) => {

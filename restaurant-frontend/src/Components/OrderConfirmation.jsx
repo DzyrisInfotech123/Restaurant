@@ -20,7 +20,7 @@ const OrderConfirmation = () => {
   const [deliveredOrders, setDeliveredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "sale"); // Retrieve priceType from localStorage
+  const [priceType, setPriceType] = useState(localStorage.getItem("priceType") || "purchase"); // Retrieve priceType from localStorage
 
   const trackingSteps = [
     { label: "Booked", icon: "fas fa-cart-plus" },

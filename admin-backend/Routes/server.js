@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 
 // Import routes
 const userRoutes = require('./user');
+const distributorRoutes = require('./distributorRoutes');
 const authRoutes = require('./auth');
 const restaurantRoutes = require('./RestaurantRoutes');
 const menuRoutes = require('./menuRoutes');
@@ -13,7 +14,8 @@ const vendorRoutes = require('./VendorRoutes');
 const productPricing = require('./ProductPricingRoutes');
 const orderRoutes = require('./orderRoutes');
 const inventoryRoutes = require('./InventoryRoutes');
-const productionRoutes = require('./ProductionRoutes')
+const productionRoutes = require('./ProductionRoutes');
+const mappingRoutes = require('./saveMapping')
 
 const app = express();
 const PORT = process.env.PORT || 4100;
@@ -48,6 +50,7 @@ mongoose
 
 // Routes
 app.use('/api', userRoutes);
+app.use('/api', distributorRoutes);
 app.use('/api', authRoutes);
 app.use('/api', restaurantRoutes);
 app.use('/api', menuRoutes);
@@ -55,7 +58,8 @@ app.use('/api', vendorRoutes);
 app.use('/api', productPricing);
 app.use('/api', orderRoutes);
 app.use('/api', inventoryRoutes);
-app.use('/api', productionRoutes)
+app.use('/api', productionRoutes);
+app.use('/api', mappingRoutes)
 
 // Default route
 app.get('/', (req, res) => {

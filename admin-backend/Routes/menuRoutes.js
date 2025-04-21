@@ -24,7 +24,7 @@ router.use('/uploads', express.static(path.join(__dirname, '../../uploads'))); /
 // Add Menu Item
 router.post('/addMenuItem', upload.single('img'), async (req, res) => {
   try {
-    const { restaurantId, name, price, type, description, addOns } = req.body;
+    const { vendorId, name, price, type, description, addOns } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ error: 'No image uploaded' });
@@ -46,7 +46,7 @@ router.post('/addMenuItem', upload.single('img'), async (req, res) => {
     }
 
     const newMenuItem = new MenuItem({
-      restaurantId,
+      vendorId,
       name,
       price,
       type,

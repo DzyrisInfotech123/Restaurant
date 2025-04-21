@@ -25,10 +25,13 @@ const Production = () => {
 
   useEffect(() => {
     if (restaurants.length > 0) {
-      setSelectedRestaurant(restaurants[0]._id);
-      fetchMenuItems(restaurants[0]._id);
+      const defaultRestaurant = restaurants[0]._id;
+      setSelectedRestaurant(defaultRestaurant);
+      form.setFieldsValue({ restaurant: defaultRestaurant }); // Set the default value in the form
+      fetchMenuItems(defaultRestaurant);
     }
   }, [restaurants]);
+  
 
   useEffect(() => {
     const filtered = menuItems.filter(item =>
@@ -83,6 +86,7 @@ const Production = () => {
 
   const fetchProductionEntries = async () => {
     const vendorId = getVendorId();
+    console.log("Vendor ID:", vendorId);
     if (!vendorId) return;
 
     try {
@@ -97,30 +101,44 @@ const Production = () => {
       console.error("Error fetching production entries:", error);
     }
   };
+  
 
   const generateProductionId = async () => {
-  const vendorId = getVendorId();
-  if (!vendorId) return;
-
-  try {
-    // Ensure we are fetching productions only for the logged-in vendor
-    const { data } = await axios.get(`/getProductions?vendorId=${vendorId}`);
-    
-    // If no entries exist, start with 1
-    const nextEntryCount = Array.isArray(data) && data.length > 0 ? data.length + 1 : 1;
-
-    const date = new Date();
-    const monthAbbr = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-    const year = date.getFullYear().toString().slice(-2);
-    const newProductionId = `DZY${monthAbbr}${year}${nextEntryCount.toString().padStart(2, '0')}`;
-
-    setProductionId(newProductionId);
-  } catch (error) {
-    message.error("Failed to generate production ID.");
-    console.error("Error generating production ID:", error);
-    setProductionId("DZY0001"); // Fallback Production ID
-  }
-};
+    const vendorId = getVendorId();
+    if (!vendorId) return;
+  
+    try {
+      const { data } = await axios.get(`/getProduction?vendorId=${vendorId}`);
+      console.log("Fetched production data:", data); // Debugging output
+  
+      let nextEntryCount = "01"; // Default if no entries exist
+  
+      if (Array.isArray(data) && data.length > 0) {
+        // Ensure the data is sorted by production ID
+        const sortedData = data.sort((a, b) => a.productionid.localeCompare(b.productionid));
+  
+        // Extract the last production entry ID
+        const lastProduction = sortedData[sortedData.length - 1]?.productionid;
+        console.log("Last Production ID:", lastProduction); // Debugging output
+  
+        // Extract the last 2 digits and increment correctly
+        const lastNumber = parseInt(lastProduction.slice(-2), 10) || 0;
+        nextEntryCount = (lastNumber + 1).toString().padStart(2, '0');
+      }
+  
+      const date = new Date();
+      const monthAbbr = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+      const year = date.getFullYear().toString().slice(-2);
+      const newProductionId = `DZY${monthAbbr}${year}${nextEntryCount}`;
+  
+      setProductionId(newProductionId);
+      console.log("Generated Production ID:", newProductionId); // Debugging output
+    } catch (error) {
+      message.error("Failed to generate production ID.");
+      console.error("Error generating production ID:", error);
+    }
+  };
+  
 
   
   const handleAddClick = async () => {
@@ -144,6 +162,7 @@ const Production = () => {
   const handleQuantityChange = (itemId, value) => {
     setQuantities(prev => ({ ...prev, [itemId]: value }));
   };
+  
 
   const handleSubmit = async (values) => {
     const vendorId = getVendorId();
@@ -214,7 +233,20 @@ const Production = () => {
           <Form.Item label="Production Id" name="productionid" initialValue={productionId} rules={[{ required: true }]}><Input disabled /></Form.Item>
           <Form.Item label="Date" name="date" rules={[{ required: true }]}><DatePicker style={{ width: '100%' }} /></Form.Item>
           <Form.Item label="Batch Code" name="batch" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item label="Restaurant" name="restaurant" rules={[{ required: true }]}><Select placeholder="Select Restaurant" onChange={handleRestaurantChange} value={selectedRestaurant}>{restaurants.map(restaurant => (<Option key={restaurant._id} value={restaurant._id}>{restaurant.name}</Option>))}</Select></Form.Item>
+          <Form.Item label="Restaurant" name="restaurant" rules={[{ required: true }]}>
+  <Select 
+    placeholder="Select Restaurant" 
+    onChange={handleRestaurantChange} 
+    value={selectedRestaurant}
+  >
+    {restaurants.map(restaurant => (
+      <Option key={restaurant._id} value={restaurant._id}>
+        {restaurant.name}
+      </Option>
+    ))}
+  </Select>
+</Form.Item>
+
           
           {/* Search Bar */}
           <Input

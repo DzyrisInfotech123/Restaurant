@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
-import AddUser  from '../AddUserForm';
-import UsersTable from '../UserTable';
+import {
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+} from '@ant-design/icons';
+
+import AddUser from '../UserManagement';
+import DistributorVendorMapping from '../DistributorVendorMapping';
 import AddRestaurantForm from '../AddRestaurant';
 import RestaurantTable from '../RestaurantTable';
 import MenuManagement from '../AddMenuItem';
 import ViewMenu from '../ViewMenu';
-import VendorManagement from '../VendorManagement';
+import DistributorManagement from '../DistributorManagement';
 import VendorTable from '../VendorTable';
 import VendorProductPricing from '../VendorProductPricing';
 import OrderManagement from '../OrderManagement';
-import VendorSelection from '../VendorSelection';
+import VendorManagement from '../VendorManagement';
 import PurchaseOrder from '../PurchaseOrder';
 import InventoryManagement from '../InventoryManagement';
 import ReportPage from '../ReportPage';
 import Production from '../Production';
+import RaisePo from '../RaisePo';
+import logo from '../img/Logo.png';
 
 const { Header, Content, Sider } = Layout;
 
@@ -24,138 +31,153 @@ const Dashboard = () => {
     return storedMenu ? storedMenu : '1';
   });
 
-  const [userRole, setUserRole] = useState(''); // Corrected line
+  const [userRole, setUserRole] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem('role'); // Retrieve user role from local storage
+    const role = localStorage.getItem('role');
     setUserRole(role);
     localStorage.setItem('selectedMenu', selectedMenu);
   }, [selectedMenu]);
 
   const renderContent = () => {
-    if (selectedMenu === '1' && userRole === 'admin') {
-      return (
-        <>
-          <h2>User Management</h2>
-          <AddUser  />
-          <UsersTable />
-        </>
-      );
-    }
-    if (selectedMenu === '2') {
-      return (
-        <>
-          <h2>Restaurant Management</h2>
-          <AddRestaurantForm />
-          <RestaurantTable />
-        </>
-      );
-    }
-    if (selectedMenu === '3') {
-      return (
-        <>
-          <h2>Menu Management</h2>
-          <MenuManagement />
-        </>
-      );
-    }
-    if (selectedMenu === '4') {
-      return <ViewMenu />;
-    }
-    if (selectedMenu === '5' && userRole === 'admin') {
-      return (
-        <>
-          <h2>Vendor Management</h2>
-          <VendorManagement />
-          <VendorTable />
-        </>
-      );
-    }
-    if (selectedMenu === '7' && userRole === 'admin') {
-      return (
-        <>
-          <h2>Vendor Product Pricing</h2>
-          <VendorProductPricing />
-        </>
-      );
-    }
-    if (selectedMenu === '8') {
-      return (
-        <>
-          <h2>Order Management</h2>
-          <OrderManagement />
-        </>
-      );
-    }
-    if (selectedMenu === '9' && userRole === 'admin') {
-      return (
-        <>
-          <h2>Vendor Selection</h2>
-          <VendorSelection/>
-        </>
-      );
-    }
-
-    if (selectedMenu === '10' && userRole === 'admin') {
-      return (
-        <>
-          <h2>Purchase Order</h2>
-          <PurchaseOrder/>
-        </>
-      );
-    }
-    if (selectedMenu === '11') {
-      return (
-        <>
-          <h2>Inventory Management</h2>
-          <InventoryManagement/>
-        </>
-      );
-    }
-    if (selectedMenu === '12') {
-      return (
-        <>
-          <h2>Report</h2>
-          <ReportPage/>
-        </>
-      );
-    }
-    if (selectedMenu === '13') {
-      return (
-        <>
-          <h2>Todays Production</h2>
-          <Production/>
-          
-        </>
-      );
+    switch (selectedMenu) {
+      case '1':
+        // return userRole === 'admin' && <AddUser />;
+        return <AddUser />;
+      case '2':
+        return <DistributorManagement />;
+      case '3':
+        return <VendorManagement/>;
+      case '4':
+        return <DistributorVendorMapping />;
+      case '5':
+        return(
+          <>
+            <AddRestaurantForm/>
+          </>
+        );
+        case '6':
+        return(
+          <>
+            <MenuManagement/>
+          </>
+        );
+      case '7':
+        return userRole === 'admin' && (
+          <>
+            <h2>Vendor Product Pricing</h2>
+            <VendorProductPricing />
+          </>
+        );
+      case '8':
+        return (
+          <>
+            <h2>Order Management</h2>
+            <OrderManagement />
+          </>
+        );
+      case '9':
+      return <RaisePo/>;
+      case '10':
+        return userRole === 'admin' && (
+          <>
+            <PurchaseOrder/>
+          </>
+        );
+      case '11':
+        return (
+          <>
+            <h2>Inventory Management</h2>
+            <InventoryManagement />
+          </>
+        );
+      case '12':
+        return (
+          <>
+            <h2>Report</h2>
+            <ReportPage />
+          </>
+        );
+      case '13':
+        return (
+          <>
+            <h2>Todays Production</h2>
+            <Production />
+          </>
+        );
+      default:
+        return null;
     }
   };
 
   return (
-    <Layout>
-      <Header style={{ color: '#fff', textAlign: 'center' }}>Admin Panel</Header>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Header style={{ background: '#001529', padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    {/* Logo */}
+    <img src={logo} alt="Logo" style={{ height: '90px', marginRight: '16px' , marginTop:'6%'}} />
+
+    {/* Menu toggle icon */}
+    {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+      className: 'trigger',
+      style: { color: '#fff', fontSize: '20px', cursor: 'pointer' },
+      onClick: () => setCollapsed(!collapsed),
+    })}
+  </div>
+
+  {/* Centered text */}
+  <h1 style={{ color: '#fff', margin: 0, textAlign: 'center', flex: 1 }}>Admin Panel</h1>
+
+  {/* Placeholder to balance layout */}
+  <div style={{ width: '60px' }}></div>
+</Header>
+
       <Layout>
-        <Sider>
+        <Sider
+          theme="dark"
+          width={200}
+          collapsedWidth={0}
+          collapsed={collapsed}
+          trigger={null}
+          style={{
+            transition: 'all 0.5s ease-in-out',
+            overflow: 'hidden',
+          }}
+        >
           <Menu
+            theme="dark"
             mode="inline"
             selectedKeys={[selectedMenu]}
             onClick={({ key }) => setSelectedMenu(key)}
           >
-            {userRole === 'admin' && <Menu.Item key="1">User  Management</Menu.Item>}
-            <Menu.Item key="2">Restaurant Management</Menu.Item>
-            <Menu.Item key="3">Add Menu</Menu.Item>
-            <Menu.Item key="4">Menu Management</Menu.Item>
-           {userRole === 'admin' && <Menu.Item key="5">Vendor Management</Menu.Item>} 
-            {userRole === 'admin' && <Menu.Item key="7">Vendor Product Pricing</Menu.Item>}
+            {/* {userRole === 'admin' && <Menu.Item key="1">User Management</Menu.Item>} */}
+            {<Menu.Item key="1">User Management</Menu.Item>}
+            <Menu.Item key="2">Distributor Management</Menu.Item>
+            <Menu.Item key="3">Vendor Management</Menu.Item>
+            <Menu.Item key="4">Distributor Vendor Mapping</Menu.Item>
+            <Menu.Item key="5">Add Restaurant</Menu.Item>
+            <Menu.Item key="6">Menu Management</Menu.Item>
             <Menu.Item key="8">Order Management</Menu.Item>
-            {/* {userRole ==='admin' && <Menu.Item key="9">Vendor Selection</Menu.Item>} */}
-            {/* {userRole ==='admin' && <Menu.Item key="10">Purchase Order Management</Menu.Item>} */}
+            <Menu.Item key="9">Raise PO</Menu.Item>
+            {userRole === 'admin' && <Menu.Item key="10">Purchase Order Management</Menu.Item>}
             <Menu.Item key="11">Inventory Management</Menu.Item>
-            {/* <Menu.Item key="12">Report</Menu.Item> */}
+            <Menu.Item key="12">Report</Menu.Item>
             <Menu.Item key="13">Todays Production</Menu.Item>
           </Menu>
         </Sider>
-        <Content style={{ padding: '20px' }}>{renderContent()}</Content>
+
+        <Content
+          style={{
+            margin: '8px',
+            padding: '0px',
+            background: '#fff',
+            width: '72%',
+            transition: 'margin 0.5s ease-in-out',
+          }}
+        >
+          {renderContent()}
+        </Content>
       </Layout>
     </Layout>
   );

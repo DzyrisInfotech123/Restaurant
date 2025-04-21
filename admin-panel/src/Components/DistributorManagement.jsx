@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Input, Select, Switch, Button, Table, message, Modal } from "antd";
 import axios from "axios";
 import { getUsersData } from "../utils/getUsers";
+import "./Distributor.css";
 
 const { Option } = Select;
 
@@ -17,10 +18,10 @@ const indianStates = [
   ["DL", "Delhi"], ["JK", "Jammu and Kashmir"], ["LA", "Ladakh"], ["LD", "Lakshadweep"], ["PY", "Puducherry"]
 ];
 
-const VendorManagement = () => {
+const DistributorManagement = () => {
   const [userData, setUserData] = useState([]);
-  const [vendorData, setVendorData] = useState({
-    vendorName: "",
+  const [distributorData, setDistributorData] = useState({
+    distributorName: "",
     userId: "",
     contactNo: "",
     address: "",
@@ -28,26 +29,27 @@ const VendorManagement = () => {
     gstin: "",
     active: false,
   });
-  const [vendors, setVendors] = useState([]);
+  const [distributors, setDistributors] = useState([]);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [editingVendor, setEditingVendor] = useState(null);
+  const [editingDistributor, setEditingDistributor] = useState(null);
 
   useEffect(() => {
     fetchUsers();
-    fetchVendors();
+    fetchDistributors();
   }, []);
 
   const fetchUsers = async () => {
     const data = await getUsersData();
+    console.log("Fetched Users Data:", data); // Debugging line
     setUserData(data || []);
   };
 
-  const fetchVendors = async () => {
+  const fetchDistributors = async () => {
     try {
-      const res = await axios.get("https://dev.digitalexamregistration.com/api/getVendor");
-      setVendors(res.data || []);
+      const res = await axios.get("https://dev.digitalexamregistration.com/api/getDistributor");
+      setDistributors(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch vendors", err);
+      console.error("Failed to fetch distributors", err);
     }
   };
 
@@ -57,17 +59,16 @@ const VendorManagement = () => {
     }
 
     if (target === "edit") {
-      setEditingVendor((prev) => ({ ...prev, [name]: value }));
+      setEditingDistributor((prev) => ({ ...prev, [name]: value }));
     } else {
-      setVendorData((prev) => ({ ...prev, [name]: value }));
+      setDistributorData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSave = async () => {
-    const { vendorName, userId, contactNo, address, state, gstin, active } = vendorData;
+    const { distributorName, userId, contactNo, address, state, gstin, active } = distributorData;
 
-    // Check for required fields
-    if (!vendorName || !userId || !contactNo || !address || !state || !gstin) {
+    if (!distributorName || !userId || !contactNo || !address || !state || !gstin) {
       message.error("All fields are required!");
       return;
     }
@@ -78,35 +79,41 @@ const VendorManagement = () => {
     }
 
     try {
-      await axios.post("https://dev.digitalexamregistration.com/api/addVendor", {
-        vendorName,
-        vendorId: userId,
-        constactNumber: contactNo, // Use contactNumber for saving
-        vendorAddress: address,
+      await axios.post("https://dev.digitalexamregistration.com/api/addDistributor", {
+        distributorName,
+        distributorId: userId,
+        constactNumber: contactNo,
+        distributorAddress: address,
         state,
         gstIn: gstin,
         active
       });
 
-      message.success("Vendor added successfully!");
-      setVendorData({
-        vendorName: "", userId: "", contactNo: "", address: "", state: "", gstin: "", active: false,
+      message.success("Distributor added successfully!");
+      setDistributorData({
+        distributorName: "",
+        userId: "",
+        contactNo: "",
+        address: "",
+        state: "",
+        gstin: "",
+        active: false,
       });
 
-      fetchVendors();
+      fetchDistributors();
     } catch (error) {
-      message.error("Failed to save vendor: " + (error.response?.data?.error || error.message));
+      message.error("Failed to save distributor");
       console.error(error);
     }
   };
 
   const handleEdit = (record) => {
-    setEditingVendor({
+    setEditingDistributor({
       id: record._id,
-      vendorName: record.vendorName,
-      userId: record.vendorId,
-      constactNumber: record.constactNumber, // Use contactNo for displaying
-      address: record.vendorAddress,
+      distributorName: record.distributorName,
+      userId: record.distributorId,
+      contactNo: record.constactNumber,
+      address: record.distributorAddress,
       state: record.state,
       gstin: record.gstIn,
       active: record.active,
@@ -115,9 +122,9 @@ const VendorManagement = () => {
   };
 
   const handleUpdate = async () => {
-    const { id, vendorName, userId, constactNumber, address, state, gstin, active } = editingVendor;
+    const { distributorName, userId, contactNo, address, state, gstin, active } = editingDistributor;
 
-    if (!vendorName || !userId || !constactNumber || !address || !state || !gstin) {
+    if (!distributorName || !userId || !contactNo || !address || !state || !gstin) {
       message.error("All fields are required!");
       return;
     }
@@ -128,30 +135,29 @@ const VendorManagement = () => {
     }
 
     try {
-      await axios.put("https://dev.digitalexamregistration.com/api/updateVendor", {
-        vendorId: userId,
-        vendorName,
-        constactNumber: constactNumber, // Use contactNumber for updating
-        vendorAddress: address,
+      await axios.put("https://dev.digitalexamregistration.com/api/updateDistributor", {
+        distributorName,
+        distributorId: userId,
+        constactNumber: contactNo,
+        distributorAddress: address,
         state,
         gstIn: gstin,
         active
       });
-      message.success("Vendor updated successfully!");
+      message.success("Distributor updated successfully!");
       setIsEditModalVisible(false);
-      fetchVendors();
+      fetchDistributors();
     } catch (error) {
-      message.error("Failed to update vendor: " + (error.response?.data?.error || error.message));
+      message.error("Failed to update distributor");
       console.error(error);
     }
   };
 
-  const filteredUsers = userData.filter(user => user.role === "Vendor");
+  const filteredUsers = userData.filter(user => user.role === "Distributor");
 
   const columns = [
-    { title: "Vendor Name", dataIndex: "vendorName", key: "vendorName" },
-    { title: "User  ID", dataIndex: "vendorId", key: "vendorId" },
-    { title: "Contact No", dataIndex: "constactNumber", key: "constactNumber" }, // Use contactNo for displaying
+    { title: "Distributor Name", dataIndex: "distributorName", key: "distributorName" },
+    { title: "Contact No", dataIndex: "constactNumber", key: "constactNumber" },
     { title: "State", dataIndex: "state", key: "state" },
     { title: "GSTIN No", dataIndex: "gstIn", key: "gstIn" },
     {
@@ -162,8 +168,8 @@ const VendorManagement = () => {
     },
     {
       title: "Address",
-      dataIndex: "vendorAddress",
-      key: "vendorAddress",
+      dataIndex: "distributorAddress",
+      key: "distributorAddress",
       render: (text) => (
         <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>{text}</div>
       ),
@@ -177,47 +183,49 @@ const VendorManagement = () => {
 
   return (
     <div className="container">
-      <div className="header">Vendor Management</div>
+      <div className="header">Distributor Management</div>
 
       <div className="form-container">
         <div className="form-group">
-          <label>Vendor Name</label>
+          <label>Distributor Name</label>
           <Select
             className="custom-select"
-            value={vendorData.vendorName || undefined}
-            onChange={(name) => {
-              const selectedUser  = filteredUsers.find(user => user.userName === name);
+            value={distributorData.distributorName || undefined}
+            onChange={(selectedName) => {
+              const selectedUser  = filteredUsers.find(user => user.userName === selectedName);
               if (selectedUser ) {
-                handleChange("vendorName", selectedUser .userName);
+                handleChange("distributorName", selectedUser .userName);
                 handleChange("userId", selectedUser .userId);
-                handleChange("contactNo", selectedUser .contactNo); // Use contactNo for displaying
+                handleChange("contactNo", selectedUser .contactNo);
               }
             }}
             style={{ width: "100%" }}
             showSearch
             optionFilterProp="children"
-            placeholder="Select Vendor Name"
+            placeholder="Select Distributor Name"
           >
             {filteredUsers.map(user => (
-              <Option key={user.userId} value={user.userName}>{user.userName}</Option>
+              <Option key={user.userId} value={user.userName}>
+                {user.userName}
+              </Option>
             ))}
           </Select>
         </div>
 
         <div className="form-group">
           <label>User ID</label>
-          <Input disabled value={vendorData.userId} />
+          <Input disabled value={distributorData.userId} />
         </div>
 
         <div className="form-group">
           <label>Contact No.</label>
-          <Input disabled value={vendorData.contactNo} />
+          <Input disabled value={distributorData.contactNo} />
         </div>
 
         <div className="form-group">
-          <label>Vendor Address</label>
+          <label>Distributor Address</label>
           <Input.TextArea
-            value={vendorData.address}
+            value={distributorData.address}
             onChange={(e) => handleChange("address", e.target.value)}
             autoSize={{ minRows: 2, maxRows: 6 }}
           />
@@ -226,13 +234,13 @@ const VendorManagement = () => {
         <div className="form-group">
           <label>State</label>
           <Select
-            value={vendorData.state}
+            value={distributorData.state}
             onChange={(value) => handleChange("state", value)}
             style={{ width: "100%" }}
           >
             <Option value="">Select State</Option>
             {indianStates.map(([code, name]) => (
-              <Option key={code} value={code}>{name}</Option>
+              <Option key={code} value ={code}>{name}</Option>
             ))}
           </Select>
         </div>
@@ -240,7 +248,7 @@ const VendorManagement = () => {
         <div className="form-group">
           <label>GSTIN No.</label>
           <Input
-            value={vendorData.gstin}
+            value={distributorData.gstin}
             onChange={(e) => handleChange("gstin", e.target.value)}
             maxLength={15}
           />
@@ -248,9 +256,9 @@ const VendorManagement = () => {
 
         <div className="form-group checkbox">
           <label className="checkbox-label">
-            Vendor Active
+            Distributor Active
             <Switch
-              checked={vendorData.active}
+              checked={distributorData.active}
               onChange={(checked) => handleChange("active", checked)}
               style={{ marginLeft: "10px" }}
             />
@@ -259,43 +267,44 @@ const VendorManagement = () => {
 
         <div className="buttons">
           <Button type="primary" onClick={handleSave} className="save-btn">Save</Button>
-          <Button onClick={() => setVendorData({
-            vendorName: "", userId: "", contactNo: "", address: "", state: "", gstin: "", active: false
+          <Button onClick={() => setDistributorData({
+            distributorName: "", userId: "", contactNo: "", address: "", state: "", gstin: "", active: false
           })} className="reset-btn">Reset</Button>
         </div>
       </div>
 
       <div className="table-container">
-        <div className="table-header">View Vendors</div>
-        <Table dataSource={vendors} columns={columns} rowKey="_id" />
+        <div className="table-header">View Distributor</div>
+        <Table dataSource={distributors} columns={columns} rowKey="_id" />
       </div>
 
+      {/* Edit Modal */}
       <Modal
-        title="Edit Vendor"
+        title="Edit Distributor"
         open={isEditModalVisible}
         onOk={handleUpdate}
         onCancel={() => setIsEditModalVisible(false)}
         okText="Update"
       >
         <div className="form-group">
-          <label>Vendor Name</label>
-          <Input disabled value={editingVendor?.vendorName} />
+          <label>Distributor Name</label>
+          <Input disabled value={editingDistributor?.distributorName} />
         </div>
         <div className="form-group">
           <label>User ID</label>
-          <Input disabled value={editingVendor?.userId} />
+          <Input disabled value={editingDistributor?.userId} />
         </div>
         <div className="form-group">
           <label>Contact No.</label>
-          <Input disabled value={editingVendor?.constactNumber} />
+          <Input disabled value={editingDistributor?.contactNo} />
         </div>
         <div className="form-group">
-          <label>Vendor Address</label>
-          <Input.TextArea value={editingVendor?.address} onChange={(e) => handleChange("address", e.target.value, "edit")} />
+          <label>Distributor Address</label>
+          <Input.TextArea value={editingDistributor?.address} onChange={(e) => handleChange("address", e.target.value, "edit")} />
         </div>
         <div className="form-group">
           <label>State</label>
-          <Select value={editingVendor?.state} onChange={(val) => handleChange("state", val, "edit")} style={{ width: "100%" }}>
+          <Select value={editingDistributor?.state} onChange={(val) => handleChange("state", val, "edit")} style={{ width: "100%" }}>
             {indianStates.map(([code, name]) => (
               <Option key={code} value={code}>{name}</Option>
             ))}
@@ -303,12 +312,12 @@ const VendorManagement = () => {
         </div>
         <div className="form-group">
           <label>GSTIN No.</label>
-          <Input value={editingVendor?.gstin} onChange={(e) => handleChange("gstin", e.target.value, "edit")} maxLength={15} />
+          <Input value={editingDistributor?.gstin} onChange={(e) => handleChange("gstin", e.target.value, "edit")} maxLength={15} />
         </div>
         <div className="form-group checkbox">
           <label className="checkbox-label">
-            Vendor Active
-            <Switch checked={editingVendor?.active} onChange={(checked) => handleChange("active", checked, "edit")} style={{ marginLeft: "10px" }} />
+            Distributor Active
+            <Switch checked={editingDistributor?.active} onChange={(checked) => handleChange("active", checked, "edit")} style={{ marginLeft: "10px" }} />
           </label>
         </div>
       </Modal>
@@ -316,4 +325,4 @@ const VendorManagement = () => {
   );
 };
 
-export default VendorManagement;
+export default DistributorManagement;

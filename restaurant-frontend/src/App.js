@@ -6,7 +6,7 @@ import OrderConfirmation from "./Components/OrderConfirmation";
 import OrderCompleted from "./Components/OrderCompleted";
 import Mode from "./Components/Mode";
 import SaleOrder from "./Components/SaleOrder";
-
+import Menu from "./Components/Menu";
 const App = () => {
   return (
 
@@ -17,6 +17,8 @@ const App = () => {
         <Route path="mode" element={<Mode/>}></Route>
         <Route path="/order-completed" element={<OrderCompleted/>} />
         <Route path="/SaleOrder" element={<SaleOrder/>} />
+        <Route path="/Menu" element={<Menu/>} />
+ 
       </Routes>
   );
 };
